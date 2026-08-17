@@ -100,10 +100,12 @@
   var linkSynProv = prop(syn, provNode);
   var props = [linkSynIao, linkSynProv];
 
-  check("default set is the project ontologies plus prov and duo",
-    groups.defaultVisibleKeys(), ["sagegov", "sagebrain", "prov", "obo:DUO"]);
+  check("default set is the project ontologies plus the vocabularies they reuse",
+    groups.defaultVisibleKeys(), ["sagegov", "sagebrain", "biolink", "prov", "obo:DUO"]);
   check("sagegov is default-visible", groups.isDefaultVisible("sagegov"), true);
   check("sagebrain is default-visible before it ships", groups.isDefaultVisible("sagebrain"), true);
+  check("biolink is default-visible -- sagebrain reuses its Gene and Pathway",
+    groups.isDefaultVisible("biolink"), true);
   check("IAO is not default-visible", groups.isDefaultVisible("obo:IAO"), false);
 
   var f = webvowl.modules.ontologyFilter();

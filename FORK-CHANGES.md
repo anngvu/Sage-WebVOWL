@@ -23,20 +23,25 @@ In the toolbar slot the picker used to occupy. One row per source vocabulary:
 - the **swatch** assigns one of 4 highlight colours
 - **Show all / Hide all / Show default / Reset** act on every row at once
 
-**The app starts on a default set:** the project's own ontologies plus the two
-imports they are modelled against — `sagegov`, `sagebrain`, PROV-O and DUO — with
-everything else hidden. The OBO upper-level scaffolding (IAO alone is 123
+**The app starts on a default set:** the project's own ontologies plus the
+imports they are modelled against — `sagegov`, `sagebrain`, Biolink, PROV-O and
+DUO — with everything else hidden. The OBO upper-level scaffolding (IAO alone is 123
 classes), XSD, RDF/RDFS and OWL are structural and bury the project's terms if
 shown by default. On a build with governance included that is 124 nodes instead
 of 340. "Show default" returns to that set from any state; "Reset" also restores
 the default colours.
 
 The set is defined once, as `DEFAULT_VISIBLE` in
-`src/webvowl/js/util/ontologyGroups.js`, and has exactly four members — which is
-exactly the number of highlight colours, so every group visible at startup gets
-its own hue. Keys naming an ontology the loaded build does not contain are simply
-absent, so the same list works for the default `sagebrain`-only build (where it
-resolves to one group) and for `WITH_GOVERNANCE=1` (where it resolves to four).
+`src/webvowl/js/util/ontologyGroups.js`. Keys naming an ontology the loaded build
+does not contain are simply absent, so the same list works for the default
+`sagebrain`-only build (where it resolves to `sagebrain` and Biolink) and for
+`WITH_GOVERNANCE=1` (where it resolves to all five).
+
+It has five members against four highlight colours, so on the governance build
+the last group starts neutral grey until the user gives it a swatch. Biolink is
+what pushed it past four, and it earns the seat: `sagebrain` reuses
+`biolink:Gene` and `biolink:Pathway` by IRI, so a hidden Biolink group takes two
+of the model's own element types off the canvas.
 
 ## Grouping is finer than VOWL's `baseIri`
 

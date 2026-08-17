@@ -53,6 +53,14 @@ module.exports = (function (){
     // the same vocabulary, and they are not merged into the visualized graph
     // anyway, so they do not need a group of their own.
     { match: "w3id.org/synapse/sagebrain", key: "sagebrain", label: "sagebrain", rank: RANK_OWN },
+    // biolink: <https://w3id.org/biolink/vocab/>. Ranked as an import, but it is
+    // not a peripheral one: sagebrain reuses biolink:Gene, biolink:Pathway and
+    // biolink:participates_in by IRI, so hiding this group takes two of the
+    // model's own element types off the canvas. Hence its place in
+    // DEFAULT_VISIBLE below. The sagebrain rule above cannot swallow these terms
+    // -- the import module's own IRI lives under …/synapse/sagebrain/imports/,
+    // but the terms it declares are in the biolink namespace.
+    { match: "w3id.org/biolink", key: "biolink", label: "Biolink · Biomedical Model", rank: RANK_IMPORT },
     { match: "w3.org/ns/prov", key: "prov", label: "PROV-O · Provenance", rank: RANK_IMPORT },
     { match: "w3.org/2001/XMLSchema", key: "xsd", label: "XSD datatypes", rank: RANK_PLUMBING },
     { match: "w3.org/2000/01/rdf-schema", key: "rdfs", label: "RDFS", rank: RANK_PLUMBING },
@@ -78,11 +86,15 @@ module.exports = (function (){
    * Keys listed here that the loaded ontology does not contain are simply
    * absent, so a vocabulary can be listed before it is merged into the graph.
    *
-   * Four entries, four highlight slots in ontologyColorSwitch -- so every
-   * default-visible group gets its own hue. Adding a fifth means deciding which
-   * one goes uncoloured.
+   * Five entries against four highlight slots in ontologyColorSwitch, so on a
+   * build that contains all five the last one starts neutral grey until the
+   * user assigns it a swatch. That is the deliberate cost of biolink being here:
+   * two of the model's element types (gene, pathway) ARE biolink terms, so
+   * leaving it out would hide them at startup, which is worse than a group
+   * starting uncoloured. The default sagebrain-only build resolves to two groups
+   * and is unaffected; only WITH_GOVERNANCE=1 reaches five.
    */
-  var DEFAULT_VISIBLE = ["sagegov", "sagebrain", "prov", "obo:DUO"];
+  var DEFAULT_VISIBLE = ["sagegov", "sagebrain", "biolink", "prov", "obo:DUO"];
 
 
   function namespaceByKey( key ){
