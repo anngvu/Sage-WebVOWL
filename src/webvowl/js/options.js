@@ -37,7 +37,10 @@ module.exports = function (){
     zoomSlider,
     datatypeFilter,
     focuserModule,
-    colorExternalsModule,
+    ontologyColorModule,
+    ontologyFilter,
+    ontologyGroupMenu,
+    hierarchyPanel,
     compactNotationModule,
     objectPropertyFilter,
     subclassFilter,
@@ -276,9 +279,21 @@ module.exports = function (){
     if ( !arguments.length ) return focuserModule;
     focuserModule = val;
   };
-  options.colorExternalsModule = function ( val ){
-    if ( !arguments.length ) return colorExternalsModule;
-    colorExternalsModule = val;
+  options.ontologyColorModule = function ( val ){
+    if ( !arguments.length ) return ontologyColorModule;
+    ontologyColorModule = val;
+  };
+  options.ontologyFilter = function ( val ){
+    if ( !arguments.length ) return ontologyFilter;
+    ontologyFilter = val;
+  };
+  options.ontologyGroupMenu = function ( val ){
+    if ( !arguments.length ) return ontologyGroupMenu;
+    ontologyGroupMenu = val;
+  };
+  options.hierarchyPanel = function ( val ){
+    if ( !arguments.length ) return hierarchyPanel;
+    hierarchyPanel = val;
   };
   options.compactNotationModule = function ( val ){
     if ( !arguments.length ) return compactNotationModule;
@@ -603,10 +618,13 @@ module.exports = function (){
   // update all set values in the default object
   options.setOptionsFromURL = function ( opts, changeEditFlag ){
     if ( opts.sidebar !== undefined ) sidebar.showSidebar(parseInt(opts.sidebar), true);
-    if ( opts.doc ) {
-      var asInt = parseInt(opts.doc);
-      filterMenu.setDegreeSliderValue(asInt);
-      graphObject.setGlobalDOF(asInt);
+    // -1 is the "not set" sentinel, and it is truthy -- testing opts.doc alone
+    // pushed setGlobalDOF(-1) on every load, discarding whatever degree of
+    // collapsing the application had configured.
+    var docValue = opts.doc === undefined ? -1 : parseInt(opts.doc, 10);
+    if ( !isNaN(docValue) && docValue >= 0 ) {
+      filterMenu.setDegreeSliderValue(docValue);
+      graphObject.setGlobalDOF(docValue);
       // reset the value to be -1;
       defaultOptionsConfig.doc = -1;
     }

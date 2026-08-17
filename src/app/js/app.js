@@ -3,7 +3,6 @@ String.prototype.replaceAll = function ( search, replacement ){
   return target.split(search).join(replacement);
 };
 module.exports = function (){
-  var newOntologyCounter = 1;
   var app = {},
     graph = webvowl.graph(),
     options = graph.graphOptions(),
@@ -16,6 +15,7 @@ module.exports = function (){
     modeMenu = require("./menu/modeMenu")(graph),
     debugMenu = require("./menu/debugMenu")(graph),
     ontologyMenu = require("./menu/ontologyMenu")(graph),
+    ontologyGroupMenu = require("./menu/ontologyGroupMenu")(graph),
     pauseMenu = require("./menu/pauseMenu")(graph),
     resetMenu = require("./menu/resetMenu")(graph),
     searchMenu = require("./menu/searchMenu")(graph),
@@ -23,6 +23,8 @@ module.exports = function (){
     zoomSlider = require("./menu/zoomSlider")(graph),
     sidebar = require("./sidebar")(graph),
     leftSidebar = require("./leftSidebar")(graph),
+    hierarchyPanel = require("./hierarchyPanel")(graph),
+    hotReload = require("./hotReload")(graph),
     editSidebar = require("./editSidebar")(graph),
     configMenu = require("./menu/configMenu")(graph),
     loadingModule = require("./loadingModule")(graph),
@@ -31,7 +33,6 @@ module.exports = function (){
     
     
     // Graph modules
-    colorExternalsSwitch = webvowl.modules.colorExternalsSwitch(graph),
     compactNotationSwitch = webvowl.modules.compactNotationSwitch(graph),
     datatypeFilter = webvowl.modules.datatypeFilter(),
     disjointFilter = webvowl.modules.disjointFilter(),
@@ -40,11 +41,16 @@ module.exports = function (){
     nodeDegreeFilter = webvowl.modules.nodeDegreeFilter(filterMenu),
     nodeScalingSwitch = webvowl.modules.nodeScalingSwitch(graph),
     objectPropertyFilter = webvowl.modules.objectPropertyFilter(),
+    ontologyFilter = webvowl.modules.ontologyFilter(),
+    ontologyColorSwitch = webvowl.modules.ontologyColorSwitch(),
     pickAndPin = webvowl.modules.pickAndPin(),
     selectionDetailDisplayer = webvowl.modules.selectionDetailsDisplayer(sidebar.updateSelectionInformation),
     statistics = webvowl.modules.statistics(),
     subclassFilter = webvowl.modules.subclassFilter(),
     setOperatorFilter = webvowl.modules.setOperatorFilter();
+  
+  // Collapse non-connected nodes by default to keep the initial view focused.
+  graph.setGlobalDOF(1);
   
   
   app.getOptions = function (){
@@ -56,129 +62,7 @@ module.exports = function (){
   // app.afterInitializationCallback=undefined;
   
   
-  var executeFileDrop = false;
-  var wasMessageToShow = false;
-  var firstTime = false;
-  
-  function addFileDropEvents( selector ){
-    var node = d3.select(selector);
-    
-    node.node().ondragover = function ( e ){
-      e.preventDefault();
-
-      d3.select("#dragDropContainer").classed("hidden", false);
-      // get svg size
-      var w = graph.options().width();
-      var h = graph.options().height();
-      
-      // get event position; (using clientX and clientY);
-      var cx = e.clientX;
-      var cy = e.clientY;
-      
-      if ( firstTime === false ) {
-        var state = d3.select("#loading-info").classed("hidden");
-        wasMessageToShow = !state;
-        firstTime = true;
-        d3.select("#loading-info").classed("hidden", true); // hide it so it does not conflict with drop event
-        var bb=d3.select("#drag_msg").node().getBoundingClientRect();
-        var hs = bb.height;
-        var ws = bb.width;
-        
-        var icon_scale=Math.min(hs,ws);
-        icon_scale/=100;
-        
-        d3.select("#drag_icon_group").attr("transform", "translate ( " + 0.25 * ws + " " + 0.25 * hs + ")");
-        d3.select("#drag_icon").attr("transform","matrix ("+icon_scale+",0,0,"+icon_scale+",0,0)");
-        d3.select("#drag_icon_drop").attr("transform","matrix ("+icon_scale+",0,0,"+icon_scale+",0,0)");
-      }
-      
-      
-      if ( (cx > 0.25 * w && cx < 0.75 * w) && (cy > 0.25 * h && cy < 0.75 * h) ) {
-        
-        d3.select("#drag_msg_text").node().innerHTML = "Drop it here.";
-        d3.select("#drag_msg").style("background-color", "#67bc0f");
-        d3.select("#drag_msg").style("color", "#000000");
-        executeFileDrop = true;
-        // d3.select("#drag_svg").transition()
-        //   .duration(100)
-        //   // .attr("-webkit-transform", "rotate(90)")
-        //   // .attr("-moz-transform",    "rotate(90)")
-        //   // .attr("-o-transform",      "rotate(90)")
-        //   .attr("transform",         "rotate(90)");
-  
-        d3.select("#drag_icon").classed("hidden",true);
-        d3.select("#drag_icon_drop").classed("hidden",false);
-  
-  
-      } else {
-        d3.select("#drag_msg_text").node().innerHTML = "Drag ontology file here.";
-        d3.select("#drag_msg").style("background-color", "#fefefe");
-        d3.select("#drag_msg").style("color", "#000000");
-        executeFileDrop = false;
-  
-        d3.select("#drag_icon").classed("hidden",false);
-        d3.select("#drag_icon_drop").classed("hidden",true);
-        
-        
-        // d3.select("#drag_svg").transition()
-        //   .duration(100)
-        //   // .attr("-webkit-transform", "rotate(0)")
-        //   // .attr("-moz-transform",    "rotate(0)")
-        //   // .attr("-o-transform",      "rotate(0)")
-        //   .attr("transform",         "rotate(0)");
-        //
-      }
-      
-    };
-    node.node().ondrop = function ( ev ){
-      ev.preventDefault();
-      firstTime = false;
-      if ( executeFileDrop ) {
-        if ( ev.dataTransfer.items ) {
-          if ( ev.dataTransfer.items.length === 1 ) {
-            if ( ev.dataTransfer.items[0].kind === 'file' ) {
-              var file = ev.dataTransfer.items[0].getAsFile();
-              graph.options().loadingModule().fromFileDrop(file.name, file);
-            }
-          }
-          else {
-            //  >> WARNING not multiple file uploaded;
-            graph.options().warningModule().showMultiFileUploadWarning();
-          }
-        }
-      }
-      d3.select("#dragDropContainer").classed("hidden", true);
-    };
-    
-    node.node().ondragleave = function ( e ){
-      var w = graph.options().width();
-      var h = graph.options().height();
-      
-      // get event position; (using clientX and clientY);
-      var cx = e.clientX;
-      var cy = e.clientY;
-      
-      var hidden = false;
-      firstTime = false;
-      
-      if ( cx < 0.1 * w || cx > 0.9 * w ) hidden = true;
-      if ( cy < 0.1 * h || cy > 0.9 * h ) hidden = true;
-      d3.select("#dragDropContainer").classed("hidden", hidden);
-      
-      d3.select("#loading-info").classed("hidden", !wasMessageToShow); // show it again
-      // check if it should be visible
-      var should_show=graph.options().loadingModule().getMessageVisibilityStatus();
-      if (should_show===false){
-        d3.select("#loading-info").classed("hidden", true); // hide it
-      }
-    };
-    
-  }
-  
-  
   app.initialize = function (){
-    addFileDropEvents(GRAPH_SELECTOR);
-    
     window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || function ( f ){
         return setTimeout(f, 1000 / 60);
       }; // simulate calling code 60
@@ -191,9 +75,12 @@ module.exports = function (){
     options.selectionModules().push(selectionDetailDisplayer);
     options.selectionModules().push(pickAndPin);
     
+    // First in the pipeline: its initialize() is the hierarchy panel's data hook.
+    options.filterModules().push(hierarchyPanel.dataModule());
     options.filterModules().push(emptyLiteralFilter);
     options.filterModules().push(statistics);
     
+    options.filterModules().push(ontologyFilter);
     options.filterModules().push(nodeDegreeFilter);
     options.filterModules().push(datatypeFilter);
     options.filterModules().push(objectPropertyFilter);
@@ -202,15 +89,17 @@ module.exports = function (){
     options.filterModules().push(setOperatorFilter);
     options.filterModules().push(nodeScalingSwitch);
     options.filterModules().push(compactNotationSwitch);
-    options.filterModules().push(colorExternalsSwitch);
+    options.filterModules().push(ontologyColorSwitch);
     
     d3.select(window).on("resize", adjustSize);
     
     exportMenu.setup();
     gravityMenu.setup();
     filterMenu.setup(datatypeFilter, objectPropertyFilter, subclassFilter, disjointFilter, setOperatorFilter, nodeDegreeFilter);
-    modeMenu.setup(pickAndPin, nodeScalingSwitch, compactNotationSwitch, colorExternalsSwitch);
+    modeMenu.setup(pickAndPin, nodeScalingSwitch, compactNotationSwitch, ontologyColorSwitch);
     pauseMenu.setup();
+    ontologyGroupMenu.setup(ontologyFilter, ontologyColorSwitch);
+    hierarchyPanel.setup(ontologyFilter, ontologyColorSwitch);
     sidebar.setup();
     loadingModule.setup();
     leftSidebar.setup();
@@ -223,9 +112,7 @@ module.exports = function (){
       d3.select("#browserCheck").classed("hidden", false);
       d3.select("#killWarning").classed("hidden", true);
       d3.select("#optionsArea").classed("hidden", true);
-      d3.select("#logo").classed("hidden", true);
     } else {
-      d3.select("#logo").classed("hidden", false);
       if ( agentVersion === 12 ) {
         // allow Mircosoft Edge Browser but with warning
         d3.select("#browserCheck").classed("hidden", false);
@@ -234,7 +121,7 @@ module.exports = function (){
         d3.select("#browserCheck").classed("hidden", true);
       }
       
-      resetMenu.setup([gravityMenu, filterMenu, modeMenu, focuser, selectionDetailDisplayer, pauseMenu]);
+      resetMenu.setup([gravityMenu, filterMenu, modeMenu, focuser, selectionDetailDisplayer, pauseMenu, ontologyGroupMenu, hierarchyPanel]);
       searchMenu.setup();
       navigationMenu.setup();
       zoomSlider.setup();
@@ -266,7 +153,10 @@ module.exports = function (){
       options.setOperatorFilter(setOperatorFilter);
       options.disjointPropertyFilter(disjointFilter);
       options.focuserModule(focuser);
-      options.colorExternalsModule(colorExternalsSwitch);
+      options.ontologyColorModule(ontologyColorSwitch);
+      options.ontologyFilter(ontologyFilter);
+      options.ontologyGroupMenu(ontologyGroupMenu);
+      options.hierarchyPanel(hierarchyPanel);
       options.compactNotationModule(compactNotationSwitch);
       
       ontologyMenu.setup(loadOntologyFromText);
@@ -332,14 +222,12 @@ module.exports = function (){
           d3.event.stopPropagation();
         });
       
-      d3.select("#direct-text-input").on("click", function (){
-        directInputMod.setDirectInputMode();
-      });
       d3.select("#blockGraphInteractions").node().draggable = false;
       options.prefixModule(webvowl.util.prefixTools(graph));
       adjustSize();
       sidebar.updateOntologyInformation(undefined, statistics);
       loadingModule.parseUrlAndLoadOntology(); // loads automatically the ontology provided by the parameters
+      hotReload.setup(); // no-op unless the dev build enabled it
       options.debugMenu(debugMenu);
       debugMenu.updateSettings();
       
@@ -407,12 +295,9 @@ module.exports = function (){
       classCount = data.class.length;
     }
     
+    // "Create new ontology" was part of the removed selection UI, so an empty
+    // graph is always an error here rather than a blank canvas to edit.
     var loadEmptyOntologyForEditing = false;
-    if ( location.hash.indexOf("#new_ontology") !== -1 ) {
-      loadEmptyOntologyForEditing = true;
-      newOntologyCounter++;
-      d3.select("#empty").node().href = "#opts=editorMode=true;#new_ontology" + newOntologyCounter;
-    }
     if ( classCount === 0 && graph.editorMode() === false && loadEmptyOntologyForEditing === false ) {
       // generate message for the user;
       loadingModule.emptyGraphContentError();
@@ -428,6 +313,8 @@ module.exports = function (){
       }
       graph.load();
       sidebar.updateOntologyInformation(data, statistics);
+      ontologyGroupMenu.updateGroups();
+      hierarchyPanel.updateTree();
       exportMenu.setFilename(filename);
       graph.updateZoomSliderValueFromOutside();
       adjustSize();
@@ -482,16 +369,6 @@ module.exports = function (){
     loadingModule.checkForScreenSize();
     
     adjustSliderSize();
-    // update also the padding options of loading and the logo positions;
-    var warningDiv = d3.select("#browserCheck");
-    if ( warningDiv.classed("hidden") === false ) {
-      var offset = 10 + warningDiv.node().getBoundingClientRect().height;
-      d3.select("#logo").style("padding", offset + "px 10px");
-    } else {
-      // remove the dynamic padding from the logo element;
-      d3.select("#logo").style("padding", "10px");
-    }
-    
     // scrollbar tests;
     var element = d3.select("#menuElementContainer").node();
     var maxScrollLeft = element.scrollWidth - element.clientWidth;
@@ -511,10 +388,6 @@ module.exports = function (){
     // adjust height of the leftSidebar element;
     editSidebar.updateElementWidth();
     
-    
-    var hs = d3.select("#drag_msg").node().getBoundingClientRect().height;
-    var ws = d3.select("#drag_msg").node().getBoundingClientRect().width;
-    d3.select("#drag_icon_group").attr("transform", "translate ( " + 0.25 * ws + " " + 0.25 * hs + ")");
     
   }
   

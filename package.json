@@ -43,8 +43,12 @@
     "postinstall": "grunt release",
     "package": "grunt package",
     "release": "grunt release",
-    "test": "grunt test-ci",
-    "webserver": "grunt webserver"
+    "webserver": "grunt webserver",
+    "lint": "grunt jshint:source",
+    "test": "npm run lint && npm run release && npm run test:unit && npm run test:e2e",
+    "test:unit": "test/run-unit.sh",
+    "test:e2e": "test/run-e2e.sh",
+    "test:karma": "grunt test-ci"
   },
   "license": "MIT",
   "private": true

@@ -14,5 +14,16 @@ deploy/**
 !deploy/.htaccess
 webvowl*.zip
 
+# Stamp file written by the parent repo's Makefile after `npm install` here.
+.npm-install
+
+# The converted ontology is installed here by the parent repo's build, not
+# committed -- it is a build artifact of ontology/ in sagebrain-model.
+src/app/data/sage.json
+
+# Scratch output of `make-favicon.py --preview`. The .ico it generates *is*
+# committed; this is just for eyeballing legibility.
+util/favicon/preview.png
+
 # NetBeans files
 **/nbproject/**

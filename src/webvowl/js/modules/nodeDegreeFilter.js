@@ -82,8 +82,12 @@ module.exports = function ( menu ){
     
     filteredNodes = nodes;
     filteredProperties = properties;
-    
-    if ( filteredNodes.length === 0 ) {
+
+    // Back off to degree 0 if collapsing hid everything -- but only when this
+    // filter is what emptied the graph. An already empty input means an earlier
+    // filter (e.g. hiding every ontology) did it, and resetting the slider
+    // would silently discard the user's collapsing level.
+    if ( filteredNodes.length === 0 && untouchedNodes.length > 0 ) {
       degreeSetter(0);
       filteredNodes = untouchedNodes;
       filteredProperties = untouchedProperties;

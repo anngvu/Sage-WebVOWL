@@ -44,15 +44,37 @@ AbstractTextElement.prototype._getTextColor = function ( rawBackgroundColor ){
   if ( !rawBackgroundColor ) {
     return AbstractTextElement.prototype.DARK_TEXT_COLOR;
   }
-  
+
+  // Pick whichever ink actually contrasts better against the fill. A plain
+  // luminance threshold gets mid-tone fills wrong -- it puts white on
+  // mid-greens at ~2.8:1, well under the 4.5:1 needed to stay readable.
   var backgroundColor = d3.rgb(rawBackgroundColor);
-  if ( calculateLuminance(backgroundColor) > 0.5 ) {
+  var darkRatio = contrastRatio(backgroundColor, d3.rgb(AbstractTextElement.prototype.DARK_TEXT_COLOR));
+  var lightRatio = contrastRatio(backgroundColor, d3.rgb(AbstractTextElement.prototype.LIGHT_TEXT_COLOR));
+
+  if ( darkRatio >= lightRatio ) {
     return AbstractTextElement.prototype.DARK_TEXT_COLOR;
   } else {
     return AbstractTextElement.prototype.LIGHT_TEXT_COLOR;
   }
 };
 
+/** WCAG 2.1 relative luminance. */
 function calculateLuminance( color ){
-  return 0.3 * (color.r / 255) + 0.59 * (color.g / 255) + 0.11 * (color.b / 255);
+  function channel( value ){
+    var srgb = value / 255;
+    return srgb <= 0.03928 ? srgb / 12.92 : Math.pow((srgb + 0.055) / 1.055, 2.4);
+  }
+
+  return 0.2126 * channel(color.r) + 0.7152 * channel(color.g) + 0.0722 * channel(color.b);
+}
+
+/** WCAG 2.1 contrast ratio, 1:1 (identical) to 21:1 (black on white). */
+function contrastRatio( colorA, colorB ){
+  var a = calculateLuminance(colorA),
+    b = calculateLuminance(colorB),
+    lighter = Math.max(a, b),
+    darker = Math.min(a, b);
+
+  return (lighter + 0.05) / (darker + 0.05);
 }

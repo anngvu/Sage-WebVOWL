@@ -6,8 +6,6 @@ module.exports = function ( graph ){
     loadingInfo = d3.select("#loading-info"),
     loadingProgress = d3.select("#loading-progress"),
     
-    ontologyMenuTimeout,
-    fileToLoad,
     stopTimer = false,
     loadingError = false,
     loadingStatusTimer,
@@ -75,15 +73,12 @@ module.exports = function ( graph ){
   ontologyMenu.setup = function ( _loadOntologyFromText ){
     loadOntologyFromText = _loadOntologyFromText;
     loadingModule = graph.options().loadingModule();
-    var menuEntry = d3.select("#m_select");
-    menuEntry.on("mouseover", function (){
-      var searchMenu = graph.options().searchMenu();
-      searchMenu.hideSearchEntries();
-    });
-    
-    setupConverterButtons();
-    setupUploadButton();
-    
+
+    // The ontology-selection UI (picker list, IRI converter, file upload) is
+    // gone -- this build always renders its own bundled ontology. What stays is
+    // the loading pipeline below, which graph.js relies on to report progress
+    // and errors.
+
     var descriptionButton = d3.select("#error-description-button").datum({ open: false });
     descriptionButton.on("click", function ( data ){
       var errorContainer = d3.select("#error-description-container");
@@ -134,12 +129,6 @@ module.exports = function ( graph ){
     d3.selectAll("#menuElementContainer > li > a").attr("href", location.hash || "#");
   }
   
-  ontologyMenu.setIriText = function ( text ){
-    d3.select("#iri-converter-input").node().value = text;
-    d3.select("#iri-converter-button").attr("disabled", false);
-    d3.select("#iri-converter-form").on("submit")();
-  };
-  
   ontologyMenu.clearDetailInformation = function (){
     var bpContainer = d3.select("#bulletPoint_container");
     var htmlCollection = bpContainer.node().children;
@@ -188,84 +177,6 @@ module.exports = function ( graph ){
     loadingModule.scrollDownDetails();
   }
   
-  
-  function setupConverterButtons(){
-    var iriConverterButton = d3.select("#iri-converter-button");
-    var iriConverterInput = d3.select("#iri-converter-input");
-    
-    iriConverterInput.on("input", function (){
-      keepOntologySelectionOpenShortly();
-      
-      var inputIsEmpty = iriConverterInput.property("value") === "";
-      iriConverterButton.attr("disabled", inputIsEmpty || undefined);
-    }).on("click", function (){
-      keepOntologySelectionOpenShortly();
-    });
-    
-    d3.select("#iri-converter-form").on("submit", function (){
-      var inputName = iriConverterInput.property("value");
-      
-      // remove first spaces
-      var clearedName = inputName.replace(/%20/g, " ");
-      while ( clearedName.beginsWith(" ") ) {
-        clearedName = clearedName.substr(1, clearedName.length);
-      }
-      // remove ending spaces
-      while ( clearedName.endsWith(" ") ) {
-        clearedName = clearedName.substr(0, clearedName.length - 1);
-      }
-      // check if iri is actually an url for a json file (ends with .json)
-      // create lowercase filenames;
-      inputName = clearedName;
-      var lc_iri = inputName.toLowerCase();
-      if ( lc_iri.endsWith(".json") ) {
-        location.hash = "url=" + inputName;
-        iriConverterInput.property("value", "");
-        iriConverterInput.on("input")();
-      } else {
-        location.hash = "iri=" + inputName;
-        iriConverterInput.property("value", "");
-        iriConverterInput.on("input")();
-      }
-      d3.event.preventDefault();
-      return false;
-    });
-  }
-  
-  function setupUploadButton(){
-    var input = d3.select("#file-converter-input"),
-      inputLabel = d3.select("#file-converter-label"),
-      uploadButton = d3.select("#file-converter-button");
-    
-    input.on("change", function (){
-      var selectedFiles = input.property("files");
-      if ( selectedFiles.length <= 0 ) {
-        inputLabel.text("Select ontology file");
-        uploadButton.property("disabled", true);
-      } else {
-        inputLabel.text(selectedFiles[0].name);
-        fileToLoad = selectedFiles[0].name;
-        uploadButton.property("disabled", false);
-        uploadButton.node().click();
-        // close menu;
-        graph.options().navigationMenu().hideAllMenus();
-      }
-    });
-    
-    uploadButton.on("click", function (){
-      var selectedFile = input.property("files")[0];
-      if ( !selectedFile ) {
-        return false;
-      }
-      var newHashParameter = "file=" + selectedFile.name;
-      // Trigger the reupload manually, because the iri is not changing
-      if ( location.hash === "#" + newHashParameter ) {
-        loadingModule.parseUrlAndLoadOntology();
-      } else {
-        location.hash = newHashParameter;
-      }
-    });
-  }
   
   function setLoadingStatusInfo( message ){
     // check if there is a owl2vowl li item;
@@ -605,43 +516,6 @@ module.exports = function ( graph ){
       }
     });
   };
-  
-  function keepOntologySelectionOpenShortly(){
-    // Events in the menu should not be considered
-    var ontologySelection = d3.select("#select .toolTipMenu");
-    ontologySelection.on("click", function (){
-      d3.event.stopPropagation();
-    }).on("keydown", function (){
-      d3.event.stopPropagation();
-    });
-    
-    ontologySelection.style("display", "block");
-    
-    function disableKeepingOpen(){
-      ontologySelection.style("display", undefined);
-      
-      clearTimeout(ontologyMenuTimeout);
-      d3.select(window).on("click", undefined).on("keydown", undefined);
-      ontologySelection.on("mouseover", undefined);
-    }
-    
-    // Clear the timeout to handle fast calls of this function
-    clearTimeout(ontologyMenuTimeout);
-    ontologyMenuTimeout = setTimeout(function (){
-      disableKeepingOpen();
-    }, 3000);
-    
-    // Disable forced open selection on interaction
-    d3.select(window).on("click", function (){
-      disableKeepingOpen();
-    }).on("keydown", function (){
-      disableKeepingOpen();
-    });
-    
-    ontologySelection.on("mouseover", function (){
-      disableKeepingOpen();
-    });
-  }
   
   ontologyMenu.showLoadingStatus = function ( visible ){
     if ( visible === true ) {

@@ -6,19 +6,15 @@
  */
 module.exports = function ( graph ){
   
-  var SAME_COLOR_MODE = { text: "Multicolor", type: "same" };
-  var GRADIENT_COLOR_MODE = { text: "Multicolor", type: "gradient" };
-  
   var modeMenu = {},
-    checkboxes = [],
-    colorModeSwitch;
+    checkboxes = [];
   
   var dynamicLabelWidthCheckBox;
   // getter and setter for the state of color modes
-  modeMenu.colorModeState = function ( s ){
-    if ( !arguments.length ) return colorModeSwitch.datum().active;
-    colorModeSwitch.datum().active = s;
-    return modeMenu;
+  modeMenu.colorModeState = function (){
+    // Retained for settings import/export: the ontology palette has no
+    // alternate colour mode.
+    return false;
   };
   
   
@@ -29,15 +25,10 @@ module.exports = function ( graph ){
   modeMenu.getCheckBoxContainer = function (){
     return checkboxes;
   };
-  // getter for the color switch [needed? ]
-  modeMenu.colorModeSwitch = function (){
-    return colorModeSwitch;
-  };
-  
   /**
    * Connects the website with the available graph modes.
    */
-  modeMenu.setup = function ( pickAndPin, nodeScaling, compactNotation, colorExternals ){
+  modeMenu.setup = function ( pickAndPin, nodeScaling, compactNotation, ontologyColor ){
     var menuEntry = d3.select("#m_modes");
     menuEntry.on("mouseover", function (){
       var searchMenu = graph.options().searchMenu();
@@ -48,8 +39,8 @@ module.exports = function ( graph ){
     addModeItem(pickAndPin, "pickandpin", "Pick & pin", "#pickAndPinOption", false);
     addModeItem(nodeScaling, "nodescaling", "Node scaling", "#nodeScalingOption", true);
     addModeItem(compactNotation, "compactnotation", "Compact notation", "#compactNotationOption", true);
-    var container = addModeItem(colorExternals, "colorexternals", "Color externals", "#colorExternalsOption", true);
-    colorModeSwitch = addExternalModeSelection(container, colorExternals);
+    // Keeps the "colorexternals" identifier so exported settings stay readable.
+    addModeItem(ontologyColor, "colorexternals", "Color by ontology", "#colorExternalsOption", true);
   };
   function addCheckBoxD( identifier, modeName, selector, onChangeFunc, updateLvl ){
     var moduleOptionContainer = d3.select(selector)
@@ -135,7 +126,7 @@ module.exports = function ( graph ){
       var isEnabled = moduleCheckbox.property("checked");
       d.module.enabled(isEnabled);
       if ( updateGraphOnClick && silent !== true ) {
-        graph.executeColorExternalsModule();
+        graph.executeOntologyColorModule();
         graph.executeCompactNotationModule();
         graph.lazyRefresh();
       }
@@ -146,39 +137,6 @@ module.exports = function ( graph ){
       .text(modeName);
     
     return moduleOptionContainer;
-  }
-  
-  function addExternalModeSelection( container, colorExternalsMode ){
-    var button = container.append("button").datum({ active: false }).classed("color-mode-switch", true);
-    applyColorModeSwitchState(button, colorExternalsMode);
-    
-    button.on("click", function ( silent ){
-      var data = button.datum();
-      data.active = !data.active;
-      applyColorModeSwitchState(button, colorExternalsMode);
-      if ( colorExternalsMode.enabled() && silent !== true ) {
-        graph.executeColorExternalsModule();
-        graph.lazyRefresh();
-      }
-    });
-    
-    return button;
-  }
-  
-  function applyColorModeSwitchState( element, colorExternalsMode ){
-    var isActive = element.datum().active;
-    var activeColorMode = getColorModeByState(isActive);
-    
-    element.classed("active", isActive)
-      .text(activeColorMode.text);
-    
-    if ( colorExternalsMode ) {
-      colorExternalsMode.colorModeType(activeColorMode.type);
-    }
-  }
-  
-  function getColorModeByState( isActive ){
-    return isActive ? GRADIENT_COLOR_MODE : SAME_COLOR_MODE;
   }
   
   /**
@@ -198,10 +156,6 @@ module.exports = function ( graph ){
       // Reset the module that is connected with the checkbox
       checkbox.datum().module.reset();
     });
-    
-    // set the switch to active and simulate disabling
-    colorModeSwitch.datum().active = true;
-    colorModeSwitch.on("click")();
   };
   
   /** importer functions **/
@@ -226,14 +180,10 @@ module.exports = function ( graph ){
     }
   };
   
-  modeMenu.setColorSwitchState = function ( state ){
-    // need the !state because we simulate later a click
-    modeMenu.colorModeState(!state);
+  // No-ops kept for the settings importers, which still call these.
+  modeMenu.setColorSwitchState = function (){
   };
-  modeMenu.setColorSwitchStateUsingURL = function ( state ){
-    // need the !state because we simulate later a click
-    modeMenu.colorModeState(!state);
-    colorModeSwitch.on("click")(true);
+  modeMenu.setColorSwitchStateUsingURL = function (){
   };
   
   
@@ -249,8 +199,6 @@ module.exports = function ( graph ){
     checkboxes.forEach(function ( checkbox ){
       checkbox.on("click")(checkbox.datum(), silent);
     });
-    // this simulates onclick and inverts its state
-    colorModeSwitch.on("click")(silent);
   };
   return modeMenu;
 };

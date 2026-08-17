@@ -39,21 +39,17 @@ function showBrowserWarningIfRequired(){
     d3.select("#browserCheck").classed("hidden", false);
     d3.select("#killWarning").classed("hidden", true);
     d3.select("#optionsArea").classed("hidden", true);
-    d3.select("#logo").classed("hidden", true);
   }
   if ( version == 12 ) {
-    d3.select("#logo").classed("hidden", false);
     d3.select("#browserCheck").classed("hidden", false);
     // connect the button;
     var pb_kill = d3.select("#killWarning");
     pb_kill.on("click", function (){
       console.log("hide the warning please");
       d3.select("#browserCheck").classed("hidden", true);
-      d3.select("#logo").style("padding", "10px");
     });
   }
   else {
-    d3.select("#logo").classed("hidden", false);
     d3.select("#browserCheck").classed("hidden", true);
   }
   

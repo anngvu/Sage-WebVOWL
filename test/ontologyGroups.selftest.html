@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>ontology module self test</title>
+</head>
+<!--
+  Exercises the ontology grouping / filtering / colouring modules against the
+  built bundle, without needing a click-driven browser session.
+
+  Usage: copy next to a built deploy/ and open it, e.g.
+    cp test/ontologyGroups.selftest.html deploy/ && npx serve deploy
+    open http://localhost:3000/ontologyGroups.selftest.html
+-->
+<body>
+<pre id="out">running…</pre>
+<script src="js/d3.min.js"></script>
+<script src="js/webvowl.js"></script>
+<script>
+  var lines = [];
+  function log( msg ){ lines.push(msg); }
+  function check( name, actual, expected ){
+    var ok = JSON.stringify(actual) === JSON.stringify(expected);
+    log((ok ? "PASS " : "FAIL ") + name + (ok ? "" : "  got=" + JSON.stringify(actual) + " want=" + JSON.stringify(expected)));
+  }
+
+  // Minimal stand-ins for webvowl elements: grouping only reads iri/baseIri,
+  // and filterTools reads id/domain/range.
+  var nextId = 0;
+  function node( iri, baseIri ){
+    var id = ++nextId, bg = null;
+    return {
+      id: function (){ return id; },
+      iri: function (){ return iri; },
+      baseIri: function (){ return baseIri; },
+      backgroundColor: function ( c ){ if ( !arguments.length ) return bg; bg = c; },
+      visualAttributes: function (){ return []; },
+      attributes: function (){ return []; }
+    };
+  }
+  function prop( domain, range ){
+    var id = ++nextId, bg = null;
+    return {
+      id: function (){ return id; },
+      iri: function (){ return undefined; },
+      baseIri: function (){ return undefined; },
+      domain: function (){ return domain; },
+      range: function (){ return range; },
+      backgroundColor: function ( c ){ if ( !arguments.length ) return bg; bg = c; },
+      visualAttributes: function (){ return []; },
+      attributes: function (){ return []; }
+    };
+  }
+
+  var groups = webvowl.util.ontologyGroups();
+
+  // ---- grouping ----
+  check("OBO simple prefix", groups.keyOf(node("http://purl.obolibrary.org/obo/IAO_0000102")), "obo:IAO");
+  check("OBO compound prefix", groups.keyOf(node("http://purl.obolibrary.org/obo/APOLLO_SV_00000522")), "obo:APOLLO_SV");
+  check("OBO BFO", groups.keyOf(node("http://purl.obolibrary.org/obo/BFO_0000050")), "obo:BFO");
+  check("sagegov", groups.keyOf(node("https://synapse.org/synbiont/governance/DataSharing")), "sagegov");
+  check("sagegov label", groups.labelOf("sagegov"), "sagegov");
+  check("sagebrain", groups.keyOf(node("https://w3id.org/synapse/sagebrain#Model")), "sagebrain");
+  check("sagebrain label", groups.labelOf("sagebrain"), "sagebrain");
+  check("sagebrain shapes group with it",
+    groups.keyOf(node("https://w3id.org/synapse/sagebrain/shapes#ModelShape")), "sagebrain");
+  check("both project ontologies rank first",
+    [groups.rankOf("sagegov"), groups.rankOf("sagebrain")], [0, 0]);
+  check("prov", groups.keyOf(node("http://www.w3.org/ns/prov#Agent")), "prov");
+  check("xsd", groups.keyOf(node("http://www.w3.org/2001/XMLSchema#string")), "xsd");
+  check("baseIri fallback", groups.keyOf(node(undefined, "http://www.w3.org/ns/prov")), "prov");
+  check("anonymous", groups.keyOf(node(undefined, undefined)), "anonymous");
+  check("unknown namespace keyed by namespace", groups.keyOf(node("http://example.org/vocab/core#Thing")), "iri:http://example.org/vocab/core#");
+  check("unknown namespace slash form", groups.keyOf(node("http://example.org/vocab/core/Thing")), "iri:http://example.org/vocab/core/");
+  check("unknown namespace label", groups.labelOf("iri:http://example.org/vocab/core#"), "example.org/core");
+  check("unknown baseIri used as-is", groups.keyOf(node(undefined, "http://example.org/ns")), "iri:http://example.org/ns");
+  check("unknown namespace ranks as import", groups.rankOf("iri:http://example.org/ns"), 1);
+  check("anonymous label", groups.labelOf("anonymous"), "Anonymous constructs");
+  check("unlisted obo prefix falls back to prefix", groups.labelOf("obo:ZZZ"), "ZZZ");
+  check("labels resolve without prior lookup", groups.labelOf("obo:DUO"), "DUO · Data Use");
+
+  // ordering: own terms first, then imports by count, plumbing last
+  var sample = [
+    node("http://www.w3.org/2001/XMLSchema#string"),
+    node("http://purl.obolibrary.org/obo/IAO_1"), node("http://purl.obolibrary.org/obo/IAO_2"),
+    node("http://purl.obolibrary.org/obo/IAO_3"),
+    node("http://www.w3.org/ns/prov#a"), node("http://www.w3.org/ns/prov#b"),
+    node("https://synapse.org/synbiont/governance/X")
+  ];
+  check("group order", groups.collect(sample).map(function ( g ){ return g.key; }),
+    ["sagegov", "obo:IAO", "prov", "xsd"]);
+  check("group counts", groups.collect(sample).map(function ( g ){ return g.count; }), [1, 3, 2, 1]);
+
+  // ---- filtering ----
+  var syn = node("https://synapse.org/synbiont/governance/A");
+  var iao = node("http://purl.obolibrary.org/obo/IAO_0000102");
+  var provNode = node("http://www.w3.org/ns/prov#Agent");
+  var nodes = [syn, iao, provNode];
+  var linkSynIao = prop(syn, iao);
+  var linkSynProv = prop(syn, provNode);
+  var props = [linkSynIao, linkSynProv];
+
+  check("default set is the project ontologies plus prov and duo",
+    groups.defaultVisibleKeys(), ["sagegov", "sagebrain", "prov", "obo:DUO"]);
+  check("sagegov is default-visible", groups.isDefaultVisible("sagegov"), true);
+  check("sagebrain is default-visible before it ships", groups.isDefaultVisible("sagebrain"), true);
+  check("IAO is not default-visible", groups.isDefaultVisible("obo:IAO"), false);
+
+  var f = webvowl.modules.ontologyFilter();
+  f.initialize(nodes, props);
+
+  // Startup opens on the default set, not on everything.
+  f.filter(nodes, props);
+  check("initialize applies the default set", f.filteredNodes().length, 2);
+  check("IAO hidden on startup", f.isGroupVisible("obo:IAO"), false);
+  check("sagegov visible on startup", f.isGroupVisible("sagegov"), true);
+  check("prov visible on startup", f.isGroupVisible("prov"), true);
+  // sagebrain is in the default set but absent from this data: nothing to hide,
+  // and it must not be reported as hidden either
+  check("absent default group is not hidden", f.isGroupVisible("sagebrain"), true);
+  check("hidden count counts only present groups", f.hiddenGroupCount(), 1);
+
+  // Everything else below wants the all-visible baseline.
+  f.setAllGroupsVisible(true);
+  f.filter(nodes, props);
+  check("show all reveals everything", f.filteredNodes().length, 3);
+  check("all properties kept", f.filteredProperties().length, 2);
+
+  f.setGroupVisible("obo:IAO", false);
+  f.filter(nodes, props);
+  check("hiding IAO drops its node", f.filteredNodes().length, 2);
+  check("dangling property tidied", f.filteredProperties().length, 1);
+  check("IAO reported hidden", f.isGroupVisible("obo:IAO"), false);
+
+  f.setAllGroupsVisible(false);
+  f.filter(nodes, props);
+  check("hide all empties graph", f.filteredNodes().length, 0);
+
+  f.setAllGroupsVisible(true);
+  f.filter(nodes, props);
+  check("show all restores", f.filteredNodes().length, 3);
+
+  // showDefaultGroups collapses back to the curated set from any state
+  f.setAllGroupsVisible(true);
+  f.showDefaultGroups();
+  f.filter(nodes, props);
+  check("showDefaultGroups hides non-default groups", f.filteredNodes().length, 2);
+  check("  IAO hidden", f.isGroupVisible("obo:IAO"), false);
+  check("  sagegov kept", f.isGroupVisible("sagegov"), true);
+
+  f.setAllGroupsVisible(false);
+  f.showDefaultGroups();
+  f.filter(nodes, props);
+  check("showDefaultGroups also re-shows from hide-all", f.filteredNodes().length, 2);
+
+  // reset restores the startup state, which is the default set
+  f.setGroupVisible("sagegov", false);
+  f.reset();
+  f.filter(nodes, props);
+  check("reset restores the default set, not everything", f.filteredNodes().length, 2);
+  check("  sagegov back", f.isGroupVisible("sagegov"), true);
+  check("  IAO still hidden", f.isGroupVisible("obo:IAO"), false);
+
+  f.setAllGroupsVisible(true);
+  f.filter(nodes, props);
+
+  // stale groups from a previous ontology are dropped on reload
+  f.setGroupVisible("prov", false);
+  f.initialize([syn, iao], []);
+  check("stale hidden group cleared", f.isGroupVisible("prov"), true);
+
+  // ---- colouring ----
+  var c = webvowl.modules.ontologyColorSwitch();
+  check("four slots", c.slotCount(), 4);
+  check("no highlights before seeding", c.highlightedGroups(), []);
+  check("seeding reports a repaint is due", c.applyDefaultHighlights(groups.collect(nodes)), true);
+  check("seeding is idempotent", c.applyDefaultHighlights(groups.collect(nodes)), false);
+  // IAO is present but not default-visible, so it does not take a colour slot
+  check("colours go to the default-visible groups", c.highlightedGroups(), ["sagegov", "prov"]);
+
+  // with no default-visible group present, fall back to display order
+  var cFallback = webvowl.modules.ontologyColorSwitch();
+  cFallback.applyDefaultHighlights([
+    { key: "obo:IAO", label: "a", count: 9 },
+    { key: "obo:BFO", label: "b", count: 4 }
+  ]);
+  check("falls back to display order when no default is present",
+    cFallback.highlightedGroups(), ["obo:IAO", "obo:BFO"]);
+  check("default-visible groups are highlighted, others not",
+    [c.isHighlighted("sagegov"), c.isHighlighted("prov"), c.isHighlighted("obo:IAO")],
+    [true, true, false]);
+
+  // anonymous groups never get a highlight slot
+  var cAnon = webvowl.modules.ontologyColorSwitch();
+  cAnon.applyDefaultHighlights([{ key: "anonymous", label: "x", count: 9 }, { key: "prov", label: "y", count: 1 }]);
+  check("anonymous skipped when seeding", cAnon.highlightedGroups(), ["prov"]);
+
+  c.filter(nodes, props);
+  var distinct = {};
+  nodes.forEach(function ( n ){ distinct[n.backgroundColor()] = true; });
+  // two highlight colours plus the neutral grey for IAO
+  check("highlighted groups get distinct colours, the rest neutral",
+    Object.keys(distinct).length, 3);
+  check("un-highlighted group renders neutral", iao.backgroundColor(), c.neutralColor());
+
+  c.toggleHighlight("sagegov");
+  c.filter(nodes, props);
+  check("un-highlighted group goes neutral", syn.backgroundColor(), c.neutralColor());
+
+  // slot eviction: 5th highlight evicts the oldest
+  var k = ["a", "b", "c", "d", "e"];
+  var c2 = webvowl.modules.ontologyColorSwitch();
+  k.forEach(function ( key ){ c2.toggleHighlight(key); });
+  check("never exceeds slot count", c2.highlightedGroups().length, 4);
+  check("oldest evicted", c2.highlightedGroups(), ["b", "c", "d", "e"]);
+
+  c.enabled(false);
+  c.filter(nodes, props);
+  check("disabled clears colours", nodes.map(function ( n ){ return n.backgroundColor(); }), [null, null, null]);
+
+  c.reset();
+  check("reset clears highlights", c.highlightedGroups(), []);
+  check("reset re-enables", c.enabled(), true);
+  check("reset allows re-seeding", c.applyDefaultHighlights(groups.collect(nodes)), true);
+
+
+  // ---- class hierarchy ----
+  var hier = webvowl.util.classHierarchy();
+
+  function cls( iri, label ){
+    var n = node(iri, undefined);
+    n.labelForCurrentLanguage = function (){ return label; };
+    n.type = function (){ return "owl:Class"; };
+    return n;
+  }
+  function subOf( child, parent ){
+    var p = prop(child, parent);
+    // classHierarchy identifies subclass edges via elementTools, which tests
+    // instanceof -- so the suite drives build() through a stub predicate below.
+    p.isSubClassOf = true;
+    return p;
+  }
+
+  check("label falls back to IRI local name",
+    hier.labelOf(node("http://example.org/ns#SomeThing")), "SomeThing");
+  check("label falls back for slash IRIs",
+    hier.labelOf(node("http://example.org/ns/Other")), "Other");
+  check("label prefers rdfs:label",
+    hier.labelOf(cls("http://example.org/ns#X", "Nice Label")), "Nice Label");
+  check("label of a bare node falls back to type", (function (){
+    var n = node(undefined, undefined);
+    n.type = function (){ return "owl:Class"; };
+    return hier.labelOf(n);
+  })(), "owl:Class");
+
+  // build() needs real RdfsSubClassOf instances, so exercise it against the
+  // loaded ontology through the graph instead of synthetic stubs.
+  check("countRows sums a forest", hier.countRows([
+    { children: [ { children: [] }, { children: [] } ] },
+    { children: [] }
+  ]), 4);
+
+  var failed = lines.filter(function ( l ){ return l.indexOf("FAIL") === 0; }).length;
+  var total = lines.length;
+  lines.push("");
+  lines.push(failed === 0 ? "ALL " + total + " CHECKS PASS" : failed + " of " + total + " CHECK(S) FAILED");
+  document.getElementById("out").textContent = lines.join("\n");
+</script>
+</body>
+</html>

@@ -73,6 +73,14 @@ module.exports = function (grunt) {
 					{expand: true, cwd: "src/", src: ["favicon.ico"], dest: deployPath},
 					{expand: true, src: ["license.txt"], dest: deployPath}
 				]
+			},
+			// Ontology JSON only. webpack also copies src/app/data via
+			// CopyWebpackPlugin on a full build; this is the cheap path for the
+			// watcher, so changing an ontology does not rebuild the bundles.
+			data: {
+				files: [
+					{expand: true, cwd: "src/app/", src: ["data/**/*"], dest: deployPath}
+				]
 			}
 		},
 		htmlbuild: {
@@ -148,8 +156,19 @@ module.exports = function (grunt) {
 				}
 			},
 			js: {
-				files: ["src/app/**/*", "src/webvowl/**/*"],
+				// Data is excluded: it needs no rebuild, only a copy (see below).
+				files: ["src/app/**/*", "!src/app/data/**", "src/webvowl/**/*"],
 				tasks: ["webpack:build-dev", "post-js"],
+				options: {
+					livereload: true,
+					spawn: false
+				}
+			},
+			// A regenerated ontology only has to be copied into deploy/, which
+			// makes the reload effectively instant.
+			data: {
+				files: ["src/app/data/**/*.json"],
+				tasks: ["copy:data"],
 				options: {
 					livereload: true,
 					spawn: false

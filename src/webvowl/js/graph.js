@@ -2724,20 +2724,24 @@ module.exports = function ( graphContainerSelector ){
     var create_entry = d3.select("#empty");
     var create_container = d3.select("#emptyContainer");
     
+    var hasCreateEntry = create_entry.node() !== null && create_container.node() !== null;
+
     var modeOfOpString = d3.select("#modeOfOperationString").node();
     if ( !arguments.length ) {
-      create_entry.node().checked = editMode;
-      if ( editMode === false ) {
-        create_container.node().title = "Enable editing in modes menu to create a new ontology";
-        create_entry.node().title = "Enable editing in modes menu to create a new ontology";
-        create_entry.style("pointer-events", "none");
-      } else {
-        create_container.node().title = "Creates a new empty ontology";
-        create_entry.node().title = "Creates a new empty ontology";
-        d3.select("#useAccuracyHelper").style("color", "#2980b9");
-        d3.select("#useAccuracyHelper").style("pointer-events", "auto");
-        create_entry.node().disabled = false;
-        create_entry.style("pointer-events", "auto");
+      if ( hasCreateEntry ) {
+        create_entry.node().checked = editMode;
+        if ( editMode === false ) {
+          create_container.node().title = "Enable editing in modes menu to create a new ontology";
+          create_entry.node().title = "Enable editing in modes menu to create a new ontology";
+          create_entry.style("pointer-events", "none");
+        } else {
+          create_container.node().title = "Creates a new empty ontology";
+          create_entry.node().title = "Creates a new empty ontology";
+          d3.select("#useAccuracyHelper").style("color", "#2980b9");
+          d3.select("#useAccuracyHelper").style("pointer-events", "auto");
+          create_entry.node().disabled = false;
+          create_entry.style("pointer-events", "auto");
+        }
       }
       
       return editMode;
@@ -2750,7 +2754,7 @@ module.exports = function ( graphContainerSelector ){
     // }
     editMode = val;
     
-    if ( create_entry ) {
+    if ( hasCreateEntry ) {
       create_entry.classed("disabled", !editMode);
       if ( !editMode ) {
         create_container.node().title = "Enable editing in modes menu to create a new ontology";
@@ -3425,15 +3429,22 @@ module.exports = function ( graphContainerSelector ){
     property = null;
   };
   
-  graph.executeColorExternalsModule = function (){
-    options.colorExternalsModule().filter(unfilteredData.nodes, unfilteredData.properties);
+  /**
+   * Recolors every element in place. Colouring depends only on which ontology
+   * an element belongs to, so it never changes what is visible -- a redraw is
+   * enough and the (expensive) filter pipeline can be skipped.
+   */
+  graph.executeOntologyColorModule = function (){
+    if ( unfilteredData && options.ontologyColorModule() ) {
+      options.ontologyColorModule().filter(unfilteredData.nodes, unfilteredData.properties);
+    }
   };
-  
+
   graph.executeCompactNotationModule = function (){
     if ( unfilteredData ) {
       options.compactNotationModule().filter(unfilteredData.nodes, unfilteredData.properties);
     }
-    
+
   };
   graph.executeEmptyLiteralFilter = function (){
     

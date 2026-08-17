@@ -1,3 +1,69 @@
+/*----------------------------------------------------------------
+ Sage / Synapse brand palette.
+
+ Values are the default Synapse palette used on synapse.org, taken from
+ synapse-web-monorepo: packages/synapse-react-client/src/theme/palette/Palettes.ts
+ -- primary is the Synapse blue (#395979), secondary the green (#469285).
+
+ The graph's own node colours are NOT themed from here: they live in
+ src/webvowl/js/modules/ontologyColorSwitch.js and are constrained by
+ colour-vision-deficiency separation, not by branding.
+----------------------------------------------------------------*/
+:root {
+    /* primary -- Synapse blue */
+    --sage-primary-100: #d7dee4;
+    --sage-primary-200: #b0bdc9;
+    --sage-primary-300: #889baf;
+    --sage-primary-400: #617a94;
+    --sage-primary-500: #395979;
+    --sage-primary-600: #2e4761;
+    --sage-primary-700: #223549;
+    --sage-primary-800: #172430;
+    --sage-primary-900: #0b1218;
+
+    /* secondary -- Synapse green */
+    --sage-secondary-100: #dae9e7;
+    --sage-secondary-200: #b5d3ce;
+    --sage-secondary-300: #90beb6;
+    --sage-secondary-400: #6ba89d;
+    --sage-secondary-500: #469285;
+    --sage-secondary-600: #38756a;
+    --sage-secondary-700: #2a6960;
+
+    /* tertiary -- Synapse gold */
+    --sage-tertiary-500: #edc766;
+    --sage-tertiary-600: #be9f52;
+
+    /* neutrals */
+    --sage-grey-100: #fbfbfc;
+    --sage-grey-200: #f1f3f5;
+    --sage-grey-300: #eaecee;
+    --sage-grey-400: #dfe2e6;
+    --sage-grey-500: #d0d4d9;
+    --sage-grey-600: #aeb5bc;
+    --sage-grey-700: #71767f;
+    --sage-grey-800: #4a5056;
+    --sage-grey-900: #353a3f;
+
+    /* status */
+    --sage-warning: #cc9f00;
+    --sage-error: #c13415;
+
+    /* semantic roles used throughout this file */
+    --sage-chrome: var(--sage-primary-800);          /* sidebar & bar surfaces */
+    --sage-chrome-raised: var(--sage-primary-700);   /* headers, hovered rows */
+    --sage-chrome-sunken: var(--sage-primary-600);
+    --sage-chrome-border: var(--sage-primary-600);
+    --sage-accent: var(--sage-secondary-500);        /* active / selected */
+    --sage-accent-hover: var(--sage-secondary-600);
+    --sage-accent-soft: var(--sage-secondary-100);
+    --sage-on-chrome: var(--sage-grey-500);          /* text on chrome */
+    --sage-on-chrome-strong: var(--sage-grey-100);
+    --sage-link: var(--sage-primary-500);            /* links on light */
+    --sage-link-on-chrome: var(--sage-secondary-300);
+    --sage-canvas: var(--sage-grey-200);             /* graph surface */
+}
+
 @import url(http://fonts.googleapis.com/css?family=Open+Sans);
 
 /*----------------------------------------------
@@ -20,7 +86,7 @@ html {
     position:absolute;
     top:0;
     opacity: 0.5;
-    background-color: #3071a9;
+    background-color: var(--sage-link);
     pointer-events: none;
 
 }
@@ -92,14 +158,14 @@ html {
 }
 
 #direct-text-input {
-    border: 1px solid #34495e;
+    border: 1px solid var(--sage-chrome-border);
     width: 100%;
     margin-top: 5px;
     cursor: pointer;
 }
 
 #directUploadBtn, #close_directUploadBtn {
-    border: 1px solid #34495e;
+    border: 1px solid var(--sage-chrome-border);
     width: 100%;
     margin-top: 5px;
     cursor: pointer
@@ -118,7 +184,7 @@ html {
 
 #progressBarContext {
     border-radius: 10px;
-    background-color: #bdc3c7;
+    background-color: var(--sage-on-chrome);
     height: 25px;
     border: solid 1px black;
 
@@ -129,7 +195,7 @@ html {
 #progressBarValue {
     border-radius: 9px;
     width: 0%;
-    background-color: #2980b9;
+    background-color: var(--sage-link);
     height: 25px;
     line-height: 1.5;
     text-align: center;
@@ -138,7 +204,7 @@ html {
 /** adding searching Styles **/
 .dbEntry {
     background-color: #ffffff;
-    color: #2980b9;
+    color: var(--sage-link);
     padding: 10px;
     font-size: 14px;
     border: none;
@@ -150,8 +216,8 @@ html {
 }
 
 .dbEntrySelected {
-    background-color: #bdc3c7;
-    color: #2980b9;
+    background-color: var(--sage-on-chrome);
+    color: var(--sage-link);
     padding: 10px;
     font-size: 14px;
     border: none;
@@ -159,7 +225,7 @@ html {
 }
 
 .dbEntry:hover, .dbEntry:focus {
-    background-color: #bdc3c7;
+    background-color: var(--sage-on-chrome);
 }
 
 .searchMenuEntry {
@@ -206,24 +272,24 @@ img, iframe {
 }
 
 a {
-    color: #69c;
+    color: var(--sage-link-on-chrome);
     text-decoration: none;
 }
 
 a:hover {
-    color: #3498db;
+    color: var(--sage-link);
 }
 
 #optionsArea a {
-    color: #2980b9;
+    color: var(--sage-link);
 }
 
 #optionsArea a.highlighted {
-    background-color: #d90;
+    background-color: var(--sage-accent);
 }
 
 .toolTipMenu li.highlighted {
-    background-color: #feb;
+    background-color: var(--sage-accent-soft);
 }
 
 #browserCheck {
@@ -637,7 +703,7 @@ a:hover {
         LAYOUT
 ----------------------------------------------*/
 body {
-    background: rgb(24, 32, 42);
+    background: var(--sage-chrome);
     height: 100%;
     font-size: 14px;
     font-family: 'Open Sans', Helvetica, Arial, sans-serif;
@@ -667,7 +733,7 @@ main {
 #canvasArea #graph {
     box-sizing: border-box;
     margin: 0 0 2px 0;
-    background-color: #ecf0f1;
+    background-color: var(--sage-canvas);
     overflow: hidden;
     padding: 0;
     width: 100%;
@@ -680,67 +746,6 @@ main {
     padding: 0;
 }
 
-#logo {
-    position: fixed;
-    /*padding: 10px;*/
-    pointer-events: none;
-    /*border: solid 1px red;*/
-}
-
-#logo h2 {
-    color: #3498db;
-    margin: 0;
-    line-height: 0.7;
-    text-align: center;
-    font-size: 24px;
-}
-
-#logo h2 span {
-    color: #34495E;
-    /*font-size: min(2vmin, 24px);*/
-    font-size: 16px;
-}
-
-@media screen and (max-device-height: 800px) {
-    #logo h2 {
-        font-size: calc(8px + 1.0vmin);
-    }
-
-    #logo h2 span {
-        font-size: calc(3px + 1.0vmin);
-    }
-}
-
-@media screen and (max-height: 800px) {
-    #logo h2 {
-        font-size: calc(8px + 1.0vmin);
-    }
-
-    #logo h2 span {
-        font-size: calc(3px + 1.0vmin);
-    }
-}
-
-@media screen and (max-device-width: 1200px) {
-    #logo h2 {
-        font-size: calc(8px + 1.0vmin);
-    }
-
-    #logo h2 span {
-        font-size: calc(3px + 1.0vmin);
-    }
-}
-
-@media screen and (max-width: 1200px) {
-    #logo h2 {
-        font-size: calc(8px + 1.0vmin);
-    }
-
-    #logo h2 span {
-        font-size: calc(3px + 1.0vmin);
-    }
-}
-
 .checkboxContainer input, .checkboxContainer label {
     vertical-align: middle;
 }
@@ -750,7 +755,7 @@ main {
 }
 
 #credits {
-    border-top: solid 1px #bdc3c7;
+    border-top: solid 1px var(--sage-on-chrome);
     font-size: 0.9em;
 }
 
@@ -784,13 +789,13 @@ main {
 /*TRACK*/
 .slideOption input[type=range]::-webkit-slider-runnable-track {
     -webkit-appearance: none;
-    background-color: #3071a9;
+    background-color: var(--sage-link);
     height: 3px;
 }
 
 .slideOption input[type=range]::-moz-range-track {
     -webkit-appearance: none;
-    background-color: #3071a9;
+    background-color: var(--sage-link);
     height: 3px;
 }
 
@@ -823,13 +828,13 @@ main {
 }
 
 .slideOption input[type="range"]::-moz-range-thumb:hover {
-    background-color: #d90;
+    background-color: var(--sage-accent);
     outline: none;
 }
 
 .slideOption input[type="range"]::-webkit-slider-thumb:hover {
-    background-color: #d90;
-    /*color: #d90;*/
+    background-color: var(--sage-accent);
+    /*color: var(--sage-accent);*/
     outline: none;
 }
 
@@ -922,7 +927,7 @@ main {
 
 .slideOption input[type="range"]:disabled::-webkit-slider-thumb {
     background-color: #aaaaaa;
-    /*color: #d90;*/
+    /*color: var(--sage-accent);*/
     outline: none;
 }
 
@@ -933,7 +938,7 @@ main {
 
 .slideOption input[type="range"]:disabled:hover::-webkit-slider-thumb {
     background-color: #404040;
-    /*color: #d90;*/
+    /*color: var(--sage-accent);*/
     outline: none;
 }
 
@@ -941,18 +946,19 @@ main {
     top: 0;
     right: 0;
     bottom: 0;
-    color: #bdc3c7;
+    background-color: var(--sage-chrome);
+    color: var(--sage-on-chrome);
     height: 100%;
     width: 22%;
     overflow-y: auto;
     overflow-x: hidden;
     position: fixed;
-    border-left: 1px solid #34495E;
+    border-left: 1px solid var(--sage-chrome-border);
 }
 
 #detailsArea h1 {
-    border-bottom: solid 1px #34495e;
-    color: #ecf0f1;
+    border-bottom: solid 1px var(--sage-chrome-border);
+    color: var(--sage-on-chrome-strong);
     display: block;
     font-weight: 100;
     font-size: 1.5em;
@@ -968,17 +974,17 @@ main {
 }
 
 #generalDetails span #about {
-    border-bottom: solid 1px #34495e;
+    border-bottom: solid 1px var(--sage-chrome-border);
     display: block;
     padding: 10px;
     text-align: center;
     word-wrap: break-word;
-    color: #69c;
+    color: var(--sage-link-on-chrome);
 }
 
 #generalDetails h4 {
-    background: rgb(27, 37, 46);
-    color: #ecf0f1;
+    background: var(--sage-chrome-raised);
+    color: var(--sage-on-chrome-strong);
     display: block;
     font-size: 1.1em;
     font-weight: 100;
@@ -988,7 +994,7 @@ main {
 }
 
 #detailsArea #generalDetails h5 {
-    border-bottom: solid 1px #34495e;
+    border-bottom: solid 1px var(--sage-chrome-border);
     font-size: 0.9em;
     font-weight: 100;
     margin: 0;
@@ -1022,7 +1028,7 @@ main {
 }
 
 #selection-details .propDetails a {
-    color: #69c;
+    color: var(--sage-link-on-chrome);
 }
 
 #selection-details .propDetails > span {
@@ -1049,11 +1055,11 @@ main {
 
 /* give subclass property the same background color as the canvas */
 .subclass {
-    fill: #ecf0f1;
+    fill: var(--sage-on-chrome-strong);
 }
 
 .accordion-trigger {
-    background: #24323e;
+    background: var(--sage-chrome-raised);
     cursor: pointer;
     padding: .5em;
 }
@@ -1079,12 +1085,12 @@ main {
 
 #language {
     background: transparent;
-    border: 1px solid #34495E;
-    color: #ecf0f1;
+    border: 1px solid var(--sage-chrome-border);
+    color: var(--sage-on-chrome-strong);
 }
 
 #language option {
-    background-color: #24323e;
+    background-color: var(--sage-chrome-raised);
 }
 
 .converter-form:not(:first-child) {
@@ -1100,7 +1106,7 @@ main {
     box-sizing: border-box;
     height: 20px;
     width: 74%;
-    border: 1px solid #34495E;
+    border: 1px solid var(--sage-chrome-border);
 }
 
 .converter-form button {
@@ -1109,12 +1115,12 @@ main {
     height: 20px;
     padding: 0;
     width: 25%;
-    border: 1px solid #34495E;
-    background-color: #ecf0f1;
+    border: 1px solid var(--sage-chrome-border);
+    background-color: var(--sage-grey-200);
 }
 
 #file-converter-label {
-    border: 1px solid #34495E;
+    border: 1px solid var(--sage-chrome-border);
     box-sizing: border-box;
     cursor: pointer;
     height: 20px;
@@ -1135,7 +1141,7 @@ main {
 /*right:2px;*/
 /*padding: 2px 7px 3px 7px;*/
 /*border: 1px solid #000000;*/
-/*background-color: #ecf0f1;*/
+/*background-color: var(--sage-grey-200);*/
 /*cursor: pointer;*/
 /*}*/
 
@@ -1143,7 +1149,7 @@ main {
     box-sizing: border-box;
     height: 20px;
     width: 31%;
-    border: 1px solid #34495E;
+    border: 1px solid var(--sage-chrome-border);
 }
 
 #sidebarExpandButton {
@@ -1168,10 +1174,10 @@ main {
     height: 20px;
     /*width: 69%;*/
     float: right;
-    border: 1px solid #34495E;
-    background-color: #34495E;
+    border: 1px solid var(--sage-chrome-border);
+    background-color: var(--sage-chrome-border);
     color: white;
-    /*border-bottom: 1px solid #d90;*/
+    /*border-bottom: 1px solid var(--sage-accent);*/
     text-align: left;
     width: auto;
 }
@@ -1188,28 +1194,12 @@ main {
     width: 165px;
 }
 
-#leftSideBarCollapseButton {
-    box-sizing: border-box;
-    top: 50px;
-    /*padding:5px;*/
-    color: #000000;
-    position: absolute;
-    left: 200px;
-    border: 1px solid #000000;
-    /*background-color: #ecf0f1;*/
-    cursor: pointer;
-    width: 24px;
-    height: 24px;
-    font-size: 1.5em;
-    text-align: center;
-}
-
 #leftSideBarCollapseButton:hover {
-    background-color: #d90;
+    background-color: var(--sage-accent);
 }
 
 #sidebarExpandButton:hover {
-    background-color: #d90;
+    background-color: var(--sage-accent);
 }
 
 .spanForCharSelection {
@@ -1247,13 +1237,13 @@ main {
     position: absolute;
     left: 0;
     /*border: 1px solid #000000;*/
-    background-color: rgb(24, 32, 42);
+    background-color: var(--sage-chrome);
     width: 100%;
     height: 100%;
 }
 
 #leftSideBarContent > h3 {
-    color: #ecf0f1;
+    color: var(--sage-on-chrome-strong);
     display: block;
     font-size: 1.1em;
     font-weight: 100;
@@ -1263,8 +1253,8 @@ main {
 }
 
 #generalDetailsEdit {
-    /*color: #ecf0f1;*/
-    color: #ecf0f1;
+    /*color: var(--sage-on-chrome-strong);*/
+    color: var(--sage-on-chrome-strong);
 }
 
 #generalDetailsEdit > div {
@@ -1272,7 +1262,7 @@ main {
 }
 
 #generalDetailsEdit > h3 {
-    color: #ecf0f1;
+    color: var(--sage-on-chrome-strong);
     display: block;
     font-size: 1.1em;
     font-weight: 100;
@@ -1282,7 +1272,7 @@ main {
 }
 
 .subAccordion {
-    color: #ecf0f1;
+    color: var(--sage-on-chrome-strong);
     display: block;
     font-size: 0.8em;
     font-weight: 100;
@@ -1304,12 +1294,12 @@ main {
 }
 
 .editPrefixButton:hover {
-    color: #ff972d;
+    color: var(--sage-tertiary-500);
     cursor: pointer;
 }
 
 .editPrefixIcon:hover {
-    stroke: #ff972d;
+    stroke: var(--sage-tertiary-500);
     stroke-width: 1px;
     cursor: pointer;
 }
@@ -1321,7 +1311,7 @@ main {
 }
 
 .deletePrefixButton:hover {
-    color: #ff972d;
+    color: var(--sage-tertiary-500);
     cursor: pointer;
 }
 
@@ -1332,7 +1322,7 @@ main {
 
 .invisiblePrefixButton {
     cursor: default;
-    color: rgb(24, 32, 42);
+    color: var(--sage-chrome);
 }
 
 #containerForAddPrefixButton {
@@ -1351,7 +1341,7 @@ main {
 }
 
 .roundedButton:hover {
-    background: #318638;
+    background: var(--sage-accent-hover);
     cursor: pointer;
     color: #fff;
     outline: none;
@@ -1364,7 +1354,7 @@ main {
 .prefixIRIElements {
     display: inline-block;
     padding: 3px;
-    border-bottom: 1px solid #34495E;
+    border-bottom: 1px solid var(--sage-chrome-border);
     width: 100%
 }
 
@@ -1390,8 +1380,8 @@ main {
 }
 
 #editHeader {
-    color: #ecf0f1;
-    background-color: #394f5a;
+    color: var(--sage-on-chrome-strong);
+    background-color: var(--sage-primary-500);
     display: block;
     font-size: 1.1em;
     font-weight: 100;
@@ -1399,8 +1389,8 @@ main {
 }
 
 #leftHeader {
-    color: #ecf0f1;
-    background-color: #394f5a;
+    color: var(--sage-on-chrome-strong);
+    background-color: var(--sage-primary-500);
     display: block;
     font-size: 1.1em;
     font-weight: 100;
@@ -1410,7 +1400,7 @@ main {
 }
 
 .containerForDefaultSelection {
-    color: #ecf0f1;
+    color: var(--sage-on-chrome-strong);
     display: block;
     font-size: 1.1em;
     font-weight: 100;
@@ -1420,13 +1410,13 @@ main {
 }
 
 .defaultSelected {
-    color: #a15d05;
-    background-color: #283943;
+    color: var(--sage-tertiary-600);
+    background-color: var(--sage-chrome-raised);
 }
 
 .containerForDefaultSelection:hover {
-    color: #f19505;
-    background-color: #394f5a;
+    color: var(--sage-tertiary-500);
+    background-color: var(--sage-primary-500);
     display: block;
     cursor: pointer;
 }
@@ -1435,8 +1425,8 @@ main {
     top: 50px;
     float: left;
     position: absolute;
-    background-color: #1b252e;
-    left: 0;
+    background-color: var(--sage-chrome-raised);
+    left: var(--side-tab-width);
     width: 200px;
     height: 200px;
     overflow-y: auto;
@@ -1445,7 +1435,7 @@ main {
 
 #leftSideBar {
     width: 100%;
-    background-color: rgb(24, 32, 42);
+    background-color: var(--sage-chrome);
 }
 
 #loading-info {
@@ -1461,7 +1451,7 @@ main {
 #loading-info > div {
     display: inline-block;
     color: #ffffff;
-    background-color: #18202A;
+    background-color: var(--sage-chrome);
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
 }
@@ -1488,13 +1478,13 @@ main {
 }
 
 #loadingIndicator_closeButton:hover {
-    color: #ff972d;
+    color: var(--sage-tertiary-500);
     cursor: pointer;
 
 }
 
 #loadingIndicator_closeButton {
-    color: #ffe30f;
+    color: var(--sage-tertiary-500);
     cursor: pointer;
     padding-bottom: 5px;
     float: right;
@@ -1546,7 +1536,7 @@ main {
 #error-description-button {
     margin: 5px 0 0 0;
     font-size: 12px;
-    color: #69c;
+    color: var(--sage-link-on-chrome);
     cursor: pointer;
     text-align: center;
 }
@@ -1557,7 +1547,7 @@ main {
 }
 
 #error-description-container pre {
-    background-color: #34495E;
+    background-color: var(--sage-chrome-border);
     padding: 2px;
     margin: 0;
     white-space: pre-wrap;
@@ -1601,31 +1591,127 @@ main {
     text-overflow: ellipsis;
 }
 
-.color-mode-switch {
-    float: right;
-    width: 90px;
-    cursor: pointer;
-    height: 20px;
-    padding: 0;
-    border: 0;
-    color: #555;
-    background-color: #ECEEEF;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2), inset 0 0 3px rgba(0, 0, 0, 0.1);
+/*----------------------------------------------------------------
+ Ontologies menu: show/hide and highlight by source ontology
+----------------------------------------------------------------*/
+.ontologyGroupList {
+    max-height: 60vh;
+    overflow-y: auto;
+    min-width: 300px;
 }
 
-.color-mode-switch:focus {
+.ontologyGroupList:hover {
+    background-color: #ffffff;
+}
+
+.ontologyGroupHint {
+    color: var(--sage-grey-700);
+    font-size: 11px;
+    line-height: 1.35;
+    padding: 0 2px 6px 2px;
+}
+
+.ontologyGroupRow {
+    align-items: center;
+    display: flex;
+    padding: 2px 0;
+}
+
+.ontologyGroupRow > * + * {
+    margin-left: 6px;
+}
+
+.ontologyGroupRow.hiddenOntologyGroup .ontologyGroupLabel,
+.ontologyGroupRow.hiddenOntologyGroup .ontologyGroupCount {
+    color: var(--sage-grey-600);
+}
+
+.ontologyGroupRow.hiddenOntologyGroup .ontologyGroupSwatch {
+    opacity: 0.35;
+}
+
+.ontologyGroupSwatch {
+    border: 1px solid rgba(0, 0, 0, 0.35);
+    border-radius: 3px;
+    cursor: pointer;
+    flex: 0 0 auto;
+    height: 14px;
+    padding: 0;
+    width: 14px;
+}
+
+.ontologyGroupSwatch:focus {
     outline-width: 0;
 }
 
-.color-mode-switch.active {
-    color: #FFF;
-    background-color: #32CD32;
-    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2), inset 0 0 3px rgba(0, 0, 0, 0.1);
+/* A highlighted group gets a ring so the state does not rely on colour alone. */
+.ontologyGroupSwatch.highlighted {
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px var(--sage-chrome-border);
+}
+
+.ontologyGroupCheckbox {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.ontologyGroupLabel {
+    color: var(--sage-grey-900);
+    cursor: pointer;
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ontologyGroupCount {
+    color: var(--sage-grey-700);
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+.ontologyGroupEmpty {
+    color: var(--sage-grey-700);
+    font-style: italic;
+}
+
+.ontologyGroupActions {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 4px;
+}
+
+.ontologyGroupActions:hover {
+    background-color: #ffffff;
+}
+
+.ontologyGroupAction {
+    background-color: var(--sage-grey-300);
+    border: 0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2), inset 0 0 3px rgba(0, 0, 0, 0.1);
+    color: var(--sage-grey-800);
+    cursor: pointer;
+    flex: 1 1 auto;
+    height: 22px;
+    margin: 0 3px;
+    padding: 0 6px;
+}
+
+.ontologyGroupAction:first-child {
+    margin-left: 0;
+}
+
+.ontologyGroupAction:last-child {
+    margin-right: 0;
+}
+
+.ontologyGroupAction:focus {
+    outline-width: 0;
 }
 
 /* adding button pulse animation*/
 .filterMenuButtonHighlight {
-    background-color: #d90;
+    background-color: var(--sage-accent);
 }
 
 @-webkit-keyframes buttonAnimation {
@@ -1633,7 +1719,7 @@ main {
         background-color: unset;
     }
     100% {
-        background-color: #d90;
+        background-color: var(--sage-accent);
     }
 }
 
@@ -1642,7 +1728,7 @@ main {
         background-color: unset;
     }
     100% {
-        background-color: #d90;
+        background-color: var(--sage-accent);
     }
 }
 
@@ -1651,7 +1737,7 @@ main {
         background-color: unset;
     }
     100% {
-        background-color: #d90;
+        background-color: var(--sage-accent);
     }
 }
 
@@ -1660,7 +1746,7 @@ main {
         background-color: unset;
     }
     100% {
-        background-color: #d90;
+        background-color: var(--sage-accent);
     }
 }
 
@@ -1808,7 +1894,7 @@ main {
     position: absolute;
     top: 20px;
     left: 3px;
-    /*background: #ecf0f1;;*/
+    /*background: var(--sage-grey-200);;*/
     border: solid 1px black;
     border-radius: 10px;
     cursor: pointer;
@@ -1822,7 +1908,7 @@ main {
 }
 
 .reloadCachedOntologyIcon:hover {
-    background: #d90;
+    background: var(--sage-accent);
     cursor: pointer;
 }
 
@@ -1853,17 +1939,17 @@ main {
 /*Hovered behavior for the menu entries*/
 #menuElementContainer > li > a:hover {
     box-sizing: border-box;
-    background: #1B252E;
-    /*background : #d90;*/
-    color: #bdc3c7;
+    background: var(--sage-chrome-raised);
+    /*background : var(--sage-accent);*/
+    color: var(--sage-on-chrome);
 
 }
 
 #empty:hover {
     box-sizing: border-box;
-    background: #e1e1e1;
-    /*background : #d90;*/
-    color: #2980b9;
+    background: var(--sage-grey-300);
+    /*background : var(--sage-accent);*/
+    color: var(--sage-link);
 }
 
 #empty.disabled {
@@ -1904,15 +1990,15 @@ main {
 }
 
 .toolTipMenu a {
-    color: #2980b9;
+    color: var(--sage-link);
 }
 
 .toolTipMenu > li {
-    border-top: solid 1px #bdc3c7;
+    border-top: solid 1px var(--sage-on-chrome);
 }
 
 .toolTipMenu li {
-    color: #2980b9;
+    color: var(--sage-link);
     display: block;
 }
 
@@ -1922,7 +2008,7 @@ main {
 }
 
 #menuElementContainer li > ul.toolTipMenu li a:hover {
-    background: #e1e1e1;
+    background: var(--sage-grey-300);
 }
 
 /****************************************************************************/
@@ -1936,7 +2022,7 @@ main {
     position: absolute;
     margin-top: -2px;
     font-size: 2em;
-    background-color: #24323e;
+    background-color: var(--sage-chrome-raised);
     left: 0;
 }
 
@@ -1958,7 +2044,7 @@ main {
     position: absolute;
     margin-top: -2px;
     font-size: 2em;
-    background-color: #24323e;
+    background-color: var(--sage-chrome-raised);
     right: 0;
 }
 
@@ -1967,11 +2053,11 @@ main {
 }
 
 #scrollRightButton:hover {
-    color: #bdc3c7;
+    color: var(--sage-on-chrome);
 }
 
 #scrollLeftButton:hover {
-    color: #bdc3c7;
+    color: var(--sage-on-chrome);
 }
 
 #scrollRightButton:before {
@@ -2011,7 +2097,7 @@ main {
 }
 
 #zoomSlider > p:hover {
-    background-color: #d90;
+    background-color: var(--sage-accent);
 }
 
 #zoomSliderParagraph {
@@ -2019,7 +2105,7 @@ main {
     padding-top: 5px;
     margin: -1px 0 0 0;
     border: 1px solid #000000;
-    /*background-color: #ecf0f1;*/
+    /*background-color: var(--sage-grey-200);*/
     /*width: 28px;*/
     height: 150px;
 }
@@ -2039,7 +2125,7 @@ p#zoomSliderParagraph:hover {
     right: 20px;
     bottom: 20px;
     color: #000;
-    /*background-color: #ecf0f1;*/
+    /*background-color: var(--sage-grey-200);*/
     box-sizing: border-box;
 }
 
@@ -2052,7 +2138,7 @@ p#zoomSliderParagraph:hover {
 }
 
 #menuElementContainer a.highlighted {
-    background-color: #d90;
+    background-color: var(--sage-accent);
 }
 
 /*#search-input-text.searchInputText {*/
@@ -2131,7 +2217,7 @@ a#pause-button.paused::before {
 }
 
 a#pause-button.paused:hover {
-    background-color: #d90;
+    background-color: var(--sage-accent);
     color: #fff;
 }
 
@@ -2140,7 +2226,7 @@ a#pause-button:not(.paused)::before {
 }
 
 .toolTipMenu li:hover {
-    background-color: #e1e1e1;
+    background-color: var(--sage-grey-300);
 }
 
 #emptyLiHover {
@@ -2152,7 +2238,7 @@ a#pause-button:not(.paused)::before {
 }
 
 .toggleOption li:hover {
-    background-color: #e1e1e1;
+    background-color: var(--sage-grey-300);
 }
 
 .toggleOption {
@@ -2171,7 +2257,7 @@ a#pause-button:not(.paused)::before {
 
 .customLocate {
     padding: 0;
-    background-color: #32CD32;
+    background-color: var(--sage-accent);
 }
 
 a#locateSearchResult {
@@ -2222,14 +2308,14 @@ a#locateSearchResult {
     width: 100%;
     height: 5px;
     cursor: pointer;
-    background: #3071a9;
+    background: var(--sage-link);
 }
 
 #zoomSliderElement::-moz-range-track {
     width: 100%;
     height: 5px;
     cursor: pointer;
-    background: #3071a9;
+    background: var(--sage-link);
 }
 
 /*Thumb*/
@@ -2266,7 +2352,7 @@ a#locateSearchResult {
     width: 30px;
     margin-right: 50px;
     border-radius: 3px;
-    background: #d90;
+    background: var(--sage-accent);
     cursor: pointer;
     outline: none;
     margin-top: -3px;
@@ -2279,7 +2365,7 @@ a#locateSearchResult {
     width: 30px;
     margin-right: 50px;
     border-radius: 3px;
-    background: #d90;
+    background: var(--sage-accent);
     cursor: pointer;
     outline: none;
     margin-top: -3px;
@@ -2300,7 +2386,7 @@ a#locateSearchResult {
     height: 10px;
     width: 30px;
     border-radius: 3px;
-    background: #d90;
+    background: var(--sage-accent);
     cursor: pointer;
     outline: none;
 }
@@ -2315,7 +2401,7 @@ a#locateSearchResult {
 }
 
 a#locateSearchResult.highlighted:hover {
-    background-color: #d90;
+    background-color: var(--sage-accent);
     color: red;
 }
 
@@ -2340,7 +2426,7 @@ a#locateSearchResult {
     pointer-events: auto;
     float: right;
     padding: 5px 5px;
-    color: #ffdd00;
+    color: var(--sage-tertiary-500);
 }
 
 #editorHint label:hover {
@@ -2354,7 +2440,7 @@ a#locateSearchResult {
     display: inline-block;
     color: #ffffff;
     font-size: 0.8em;
-    background-color: #18202A;
+    background-color: var(--sage-chrome);
     padding: 5px 5px;
     border-radius: 5px;
 
@@ -2383,7 +2469,7 @@ a#locateSearchResult {
     pointer-events: auto;
     float: right;
     padding: 5px 5px;
-    color: #ffdd00;
+    color: var(--sage-tertiary-500);
 }
 
 #WarningErrorMessages span {
@@ -2403,10 +2489,10 @@ a#locateSearchResult {
     display: inline-block;
     color: #ffffff;
     font-size: 0.8em;
-    background-color: #18202A;
+    background-color: var(--sage-chrome);
     padding: 5px 5px;
     border-radius: 10px;
-    border: solid 1px #ecf0f1;
+    border: solid 1px var(--sage-grey-300);
     width: 70%;
 
 }
@@ -2428,7 +2514,7 @@ a#locateSearchResult {
 .textLineEditWithLabel {
     display: inline-block;
     width: 100%;
-    border-bottom: 1px solid #34495E;
+    border-bottom: 1px solid var(--sage-chrome-border);
     padding: 2px 0;
 
 }
@@ -2439,19 +2525,19 @@ a#locateSearchResult {
 }
 
 .descriptionTextClass {
-    background-color: #34495E;
+    background-color: var(--sage-chrome-border);
     color: white;
 }
 
 .prefixIRIElements input {
-    border: 1px solid #34495E;
-    background-color: #34495E;
+    border: 1px solid var(--sage-chrome-border);
+    background-color: var(--sage-chrome-border);
     color: white;
 }
 
 .prefixIRIElements input:disabled {
-    background-color: rgb(24, 32, 42);
-    border: 1px solid rgb(24, 32, 42);
+    background-color: var(--sage-chrome);
+    border: 1px solid var(--sage-chrome);
     color: white;
 }
 
@@ -2460,20 +2546,246 @@ a#locateSearchResult {
     /*height: 18px;*/
     /*width: 69%;*/
     float: right;
-    border: 1px solid #34495E;
-    background-color: #34495E;
+    border: 1px solid var(--sage-chrome-border);
+    background-color: var(--sage-chrome-border);
     color: white;
-    /*border-bottom: 1px solid #d90;*/
+    /*border-bottom: 1px solid var(--sage-accent);*/
     /*text-align: center;*/
     /*display: inline-block;*/
 }
 
 .converter-form-Editor input:disabled {
     background-color: #545350;
-    border: 1px solid #34495E;
+    border: 1px solid var(--sage-chrome-border);
     color: #939798;
 }
 
 .disabledLabelForSlider {
     color: #808080;
+}
+
+/*----------------------------------------------------------------
+ Class hierarchy browser (left panel)
+
+ Its own panel rather than a section of #containerForLeftSideBar, which
+ belongs to editor-mode default-element picking.
+----------------------------------------------------------------*/
+/*----------------------------------------------------------------
+ Left-edge panel tabs.
+
+ Both the hierarchy browser and the editor's default-element sidebar pull out
+ from the left edge. Their tabs live in a rail of their own and the panels open
+ to the right of it, so a tab is never drawn over panel content. Stacking the
+ tabs in normal flow also means their separation is structural -- there is no
+ offset to keep in sync, so they cannot land on top of each other.
+
+ Each tab carries a short vertical label so it is obvious which panel it opens.
+----------------------------------------------------------------*/
+:root {
+    --side-tab-top: 10px;
+    --side-tab-width: 22px;
+    --side-tab-gap: 16px;
+}
+
+#leftTabRail {
+    box-sizing: border-box;
+    position: absolute;
+    top: var(--side-tab-top);
+    left: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: var(--side-tab-width);
+}
+
+.sidePanelTab {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 auto;
+    width: var(--side-tab-width);
+    margin-bottom: var(--side-tab-gap);
+    padding: 5px 0 7px 0;
+    background-color: var(--sage-chrome-raised);
+    border: 1px solid var(--sage-chrome-border);
+    border-left: none;
+    color: var(--sage-on-chrome-strong);
+    cursor: pointer;
+    font-size: 10px;
+    line-height: 1;
+    text-align: center;
+}
+
+/* .hidden still has to win over the flex display above. */
+.sidePanelTab.hidden {
+    display: none;
+}
+
+.sidePanelTab:hover,
+.sidePanelTab.active {
+    background-color: var(--sage-accent);
+}
+
+.sidePanelTabArrow {
+    flex: 0 0 auto;
+    font-size: 11px;
+}
+
+.sidePanelTabLabel {
+    flex: 0 0 auto;
+    margin-top: 5px;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+#containerForHierarchyPanel {
+    box-sizing: border-box;
+    position: absolute;
+    top: 10px;
+    left: var(--side-tab-width);
+    z-index: 9;
+    width: 320px;
+    max-height: calc(100% - 60px);
+    display: flex;
+    flex-direction: column;
+    background-color: var(--sage-chrome);
+    border: 1px solid var(--sage-chrome-border);
+    border-left: none;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+}
+
+#hierarchyPanel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#hierarchyPanelHeader {
+    display: flex;
+    align-items: baseline;
+    flex: 0 0 auto;
+    padding: 6px 8px;
+    background-color: var(--sage-chrome-raised);
+    border-bottom: 1px solid var(--sage-chrome-border);
+}
+
+#hierarchyPanelTitle {
+    flex: 1 1 auto;
+    color: var(--sage-on-chrome-strong);
+    font-size: 13px;
+}
+
+#hierarchyPanelCount {
+    flex: 0 0 auto;
+    color: var(--sage-grey-600);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+#hierarchyPanelContent {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 4px 0 6px 0;
+    font-size: 12px;
+}
+
+.hierarchyGroupRow,
+.hierarchyRow {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 2px 8px 2px 4px;
+    white-space: nowrap;
+}
+
+.hierarchyGroupRow {
+    color: var(--sage-on-chrome-strong);
+}
+
+.hierarchyRow {
+    color: var(--sage-on-chrome);
+}
+
+.hierarchyGroupRow:hover,
+.hierarchyRow:hover {
+    background-color: var(--sage-chrome-raised);
+}
+
+.hierarchyRowSelected {
+    background-color: var(--sage-accent);
+    color: var(--sage-grey-100);
+}
+
+/* Hidden by the Ontologies menu. */
+.hierarchyRowHiddenOntology {
+    opacity: 0.4;
+    text-decoration: line-through;
+}
+
+/* In the ontology, but collapsed out of the current view. */
+.hierarchyRowOffScreen {
+    opacity: 0.6;
+}
+
+.hierarchyTwisty {
+    flex: 0 0 auto;
+    width: 12px;
+    color: var(--sage-grey-600);
+    font-size: 9px;
+    text-align: center;
+}
+
+.hierarchyTwistyLeaf {
+    color: transparent;
+}
+
+.hierarchyDot {
+    flex: 0 0 auto;
+    width: 9px;
+    height: 9px;
+    margin: 0 6px 0 2px;
+    border: 1px solid rgba(0, 0, 0, 0.35);
+    border-radius: 50%;
+}
+
+.hierarchyGroupLabel,
+.hierarchyLabel {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hierarchyCount {
+    flex: 0 0 auto;
+    margin-left: 6px;
+    color: var(--sage-grey-600);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Each level indents; the tree can be 8 deep so keep the step small. */
+.hierarchyChildren {
+    margin-left: 11px;
+    border-left: 1px dotted var(--sage-chrome-border);
+}
+
+.hierarchyEmpty {
+    color: var(--sage-grey-600);
+    font-style: italic;
+    padding: 6px 8px;
+}
+
+/* Class whose superclass sits in a different ontology. */
+.hierarchyExternalParent {
+    flex: 0 0 auto;
+    margin-left: 4px;
+    color: var(--sage-grey-700);
+    font-size: 10px;
 }

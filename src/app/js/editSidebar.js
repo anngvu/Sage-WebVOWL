@@ -1006,10 +1006,12 @@ module.exports = function ( graph ){
   
   editSidebar.updateElementWidth = function (){
     var height = window.innerHeight - 40;
-    var lsb_offset = d3.select("#logo").node().getBoundingClientRect().height + 5;
+    // Used to clear the WebVOWL logo, which this build does not render.
+    var lsb_offset = 10;
     var lsb_height = height - lsb_offset;
     d3.select("#containerForLeftSideBar").style("top", lsb_offset + "px");
-    d3.select("#leftSideBarCollapseButton").style("top", lsb_offset + "px");
+    // The tab's own top is staggered in CSS so it cannot land on the
+    // hierarchy tab; don't overwrite it here.
     d3.select("#containerForLeftSideBar").style("height", lsb_height + "px");
     
     var div_width = d3.select("#generalDetailsEdit").node().getBoundingClientRect().width;

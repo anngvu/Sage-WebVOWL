@@ -10,6 +10,23 @@ module.exports = function ( graph ){
     elementTools = webvowl.util.elementTools();
   var collapseButton = d3.select("#leftSideBarCollapseButton");
   var visibleSidebar = 0;
+
+  /**
+   * The tab holds an arrow and a label, so only the arrow may be rewritten.
+   */
+  function setTabArrow( arrow ){
+    collapseButton.select(".sidePanelTabArrow").text(arrow);
+  }
+
+  /**
+   * Only one panel may occupy the left edge at a time.
+   */
+  function closeHierarchyPanel(){
+    var panel = graph.options().hierarchyPanel ? graph.options().hierarchyPanel() : undefined;
+    if ( panel && panel.isVisible() ) {
+      panel.setVisible(false);
+    }
+  }
   var backupVisibility = 0;
   var sideBarContent = d3.select("#leftSideBarContent");
   var sideBarContainer = d3.select("#containerForLeftSideBar");
@@ -184,13 +201,11 @@ module.exports = function ( graph ){
       if ( visibleSidebar === true ) {
         sideBarContainer.style("width", "200px");
         sideBarContent.classed("hidden", false);
-        d3.select("#leftSideBarCollapseButton").style("left", "200px");
         d3.select("#leftSideBarCollapseButton").classed("hidden", false);
         d3.select("#WarningErrorMessages").style("left", "100px");
       }
       else {
         sideBarContainer.style("width", "0px");
-        d3.select("#leftSideBarCollapseButton").style("left", "0px");
         d3.select("#WarningErrorMessages").style("left", "0px");
         d3.select("#leftSideBarCollapseButton").classed("hidden", false);
         
@@ -205,24 +220,25 @@ module.exports = function ( graph ){
     var collapseButton = d3.select("#leftSideBarCollapseButton");
     if ( init === true ) {
       visibleSidebar = (backupVisibility === 0);
+      if ( visibleSidebar === true ) {
+        closeHierarchyPanel();
+      }
       sideBarContent.classed("hidden", !visibleSidebar);
       sideBarContainer.style("-webkit-animation-name", "none");
       d3.select("#WarningErrorMessages").style("-webkit-animation-name", "none");
       if ( visibleSidebar === true ) {
         sideBarContainer.style("width", "200px");
         sideBarContent.classed("hidden", false);
-        d3.select("#leftSideBarCollapseButton").style("left", "200px");
         d3.select("#leftSideBarCollapseButton").classed("hidden", false);
         d3.select("#WarningErrorMessages").style("left", "100px");
-        collapseButton.node().innerHTML = "<";
+        setTabArrow("\u25c2");
       }
       
       else {
         sideBarContainer.style("width", "0px");
         d3.select("#WarningErrorMessages").style("left", "0px");
-        d3.select("#leftSideBarCollapseButton").style("left", "0px");
         d3.select("#leftSideBarCollapseButton").classed("hidden", false);
-        collapseButton.node().innerHTML = ">";
+        setTabArrow("\u25b8");
       }
       
       graph.updateCanvasContainerSize();
@@ -233,8 +249,9 @@ module.exports = function ( graph ){
     d3.select("#leftSideBarCollapseButton").classed("hidden", true);
     
     if ( val === 1 ) {
+      closeHierarchyPanel();
       visibleSidebar = true;
-      collapseButton.node().innerHTML = "<";
+      setTabArrow("\u25c2");
       // call expand animation;
       sideBarContainer.style("-webkit-animation-name", "l_sbExpandAnimation");
       sideBarContainer.style("-webkit-animation-duration", "0.5s");
@@ -247,7 +264,7 @@ module.exports = function ( graph ){
     if ( val === 0 ) {
       visibleSidebar = false;
       sideBarContent.classed("hidden", true);
-      collapseButton.node().innerHTML = ">";
+      setTabArrow("\u25b8");
       // call collapse animation
       sideBarContainer.style("-webkit-animation-name", "l_sbCollapseAnimation");
       sideBarContainer.style("-webkit-animation-duration", "0.5s");

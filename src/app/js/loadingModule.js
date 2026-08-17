@@ -1,10 +1,5 @@
 module.exports = function ( graph ){
   /** some constants **/
-  var PREDEFINED = 0,
-    FILE_UPLOAD = 1,
-    JSON_URL = 2,
-    IRI_URL = 3;
-  
   var PROGRESS_BAR_ERROR = 0,
     PROGRESS_BAR_BUSY = 1,
     PROGRESS_BAR_PERCENT = 2,
@@ -15,7 +10,10 @@ module.exports = function ( graph ){
   var showLoadingDetails = false;
   var visibilityStatus = true;
   
-  var DEFAULT_JSON_NAME = "foaf"; // This file is loaded by default
+  // The only ontology this app loads: src/app/data/<name>.json, built by the
+  // parent repo's Makefile (WEBVOWL_DATA -- keep the two in sync). It is the
+  // union of every Sage ontology, hence the neutral name.
+  var DEFAULT_JSON_NAME = "sage";
   var conversion_sessionId;
   
   /** variable defs **/
@@ -57,6 +55,11 @@ module.exports = function ( graph ){
     }
   };
   
+  /** The bundled ontology this build loads; used by the hot-reload watcher. */
+  loadingModule.getDefaultJsonName = function (){
+    return DEFAULT_JSON_NAME;
+  };
+
   loadingModule.getMessageVisibilityStatus = function (){
     return visibilityStatus;
   };
@@ -221,26 +224,15 @@ module.exports = function ( graph ){
     loadingModule.initializeLoader(autoStore);
     var urlString = String(location);
     var parameterArray = identifyParameter(urlString);
+
+    // This build ships one ontology and always renders it; there is no picker,
+    // no upload and no converter. The URL is still parsed, but only for the
+    // graph options (#opts=...), never to choose what to load.
     ontologyIdentifierFromURL = DEFAULT_JSON_NAME;
-    loadGraphOptions(parameterArray); // identifies and loads configuration values
-    var loadingMethod = identifyOntologyLoadingMethod(ontologyIdentifierFromURL);
+    loadGraphOptions(parameterArray);
+
     d3.select("#progressBarValue").node().innerHTML = " ";
-    switch ( loadingMethod ) {
-      case 0:
-        loadingModule.from_presetOntology(ontologyIdentifierFromURL);
-        break;
-      case 1:
-        loadingModule.from_FileUpload(ontologyIdentifierFromURL);
-        break;
-      case 2:
-        loadingModule.from_JSON_URL(ontologyIdentifierFromURL);
-        break;
-      case 3:
-        loadingModule.from_IRI_URL(ontologyIdentifierFromURL);
-        break;
-      default:
-        console.log("Could not identify loading method , or not IMPLEMENTED YET");
-    }
+    loadingModule.from_presetOntology(ontologyIdentifierFromURL);
   };
   
   /** ------------------- LOADING --------------------- **/
@@ -322,81 +314,6 @@ module.exports = function ( graph ){
     }
   };
   
-  loadingModule.fromFileDrop = function ( fileName, file ){
-    d3.select("#progressBarValue").node().innerHTML = " ";
-    loadingModule.initializeLoader(false);
-    
-    ontologyMenu.append_bulletPoint("Retrieving ontology from dropped file: " + fileName);
-    var ontologyContent = "";
-    
-    // two options here
-    //1] Direct Json Upload
-    if ( fileName.match(/\.json$/) ) {
-      ontologyMenu.setConversionID(-10000);
-      var reader = new FileReader();
-      reader.readAsText(file);
-      reader.onload = function (){
-        ontologyContent = reader.result;
-        ontologyIdentifierFromURL = fileName;
-        parseOntologyContent(ontologyContent);
-      };
-    } else {
-      //2] File Upload to OWL2VOWL Converter
-      // 1) check if we can get a timeStamp;
-      var parameterArray = [file, fileName];
-      requestServerTimeStamp(ontologyMenu.callbackLoadFromOntology, parameterArray);
-    }
-  };
-  
-  
-  loadingModule.from_FileUpload = function ( fileName ){
-    loadingModule.setBusyMode();
-    var filename = decodeURIComponent(fileName.slice("file=".length));
-    ontologyIdentifierFromURL = filename;
-    var ontologyContent = "";
-    if ( ontologyMenu.cachedOntology(filename) ) {
-      ontologyMenu.append_bulletPoint("Loading already cached ontology: " + filename);
-      ontologyContent = ontologyMenu.cachedOntology(filename);
-      loadingWasSuccessFul = true; // cached Ontology should be true;
-      parseOntologyContent(ontologyContent);
-      
-    } else {
-      // d3.select("#currentLoadingStep").node().innerHTML="Loading ontology from file "+ filename;
-      ontologyMenu.append_bulletPoint("Retrieving ontology from file: " + filename);
-      // get the file
-      var selectedFile = d3.select("#file-converter-input").property("files")[0];
-      // No selection -> this was triggered by the iri. Unequal names -> reuploading another file
-      if ( !selectedFile || (filename && (filename !== selectedFile.name)) ) {
-        ontologyMenu.append_message_toLastBulletPoint("<br><span style=\"color:red;\">No cached version of \"" + filename + "\" was found.</span><br>Please reupload the file.");
-        loadingModule.setErrorMode();
-        d3.select("#progressBarValue").classed("busyProgressBar", false);
-        graph.handleOnLoadingError();
-        return;
-      } else {
-        filename = selectedFile.name;
-      }
-
-
-// two options here
-//1] Direct Json Upload
-      if ( filename.match(/\.json$/) ) {
-        ontologyMenu.setConversionID(-10000);
-        var reader = new FileReader();
-        reader.readAsText(selectedFile);
-        reader.onload = function (){
-          ontologyContent = reader.result;
-          ontologyIdentifierFromURL = filename;
-          parseOntologyContent(ontologyContent);
-        };
-      } else {
-//2] File Upload to OWL2VOWL Converter
-        // 1) check if we can get a timeStamp;
-        var parameterArray = [selectedFile, filename];
-        requestServerTimeStamp(ontologyMenu.callbackLoadFromOntology, parameterArray);
-      }
-    }
-  };
-  
   function fallbackForJSON_URL( callback, parameter ){
     ontologyMenu.append_message_toLastBulletPoint("<br>Trying to convert with other communication protocol.");
     callback(parameter);
@@ -454,21 +371,6 @@ module.exports = function ( graph ){
         parameterArray[0] = parameterArray[0] + "&sessionId=" + conversion_sessionId;
         parameterArray.push(conversion_sessionId);
         callback(parameterArray);
-      }
-    });
-  }
-  
-  function requestServerTimeStamp( callback, parameterArray ){
-    d3.xhr("serverTimeStamp", "application/text", function ( error, request ){
-      if ( error ) {
-        // could not get server timestamp -> no connection to owl2vowl
-        ontologyMenu.append_bulletPoint("Could not establish connection to OWL2VOWL service");
-        fallbackConversion(parameterArray); // tries o2v version0.3.4 communication
-      } else {
-        conversion_sessionId = request.responseText;
-        ontologyMenu.setConversionID(conversion_sessionId);
-        console.log("Request Session ID:" + conversion_sessionId);
-        callback(parameterArray[0], parameterArray[1], conversion_sessionId);
       }
     });
   }
@@ -701,26 +603,7 @@ module.exports = function ( graph ){
   }
   
   
-  function identifyOntologyLoadingMethod( url ){
-    var iriKey = "iri=";
-    var urlKey = "url=";
-    var fileKey = "file=";
-    
-    var method = -1;
-    if ( url.substr(0, fileKey.length) === fileKey ) {
-      method = FILE_UPLOAD;
-    } else if ( url.substr(0, urlKey.length) === urlKey ) {
-      method = JSON_URL;
-    } else if ( url.substr(0, iriKey.length) === iriKey ) {
-      method = IRI_URL;
-    } else {
-      method = PREDEFINED;
-    }
-    return method;
-  }
-  
   return loadingModule;
 }
 ;
-
 
